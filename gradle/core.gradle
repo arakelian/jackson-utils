@@ -66,6 +66,7 @@ repositories {
     mavenLocal()
 
     // external maven repo is next preference
+    mavenCentral()
     jcenter()
 }
 
