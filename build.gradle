@@ -35,7 +35,7 @@ dependencies {
     processor 'org.immutables:value:2.5.6'
 
     // common stuff
-    compile 'com.arakelian:more-commons:1.+'
+    compile 'com.arakelian:more-commons:[1.5,2.0['
     compile 'com.google.guava:guava:23.4-jre'
     compile 'org.apache.commons:commons-lang3:3.7'
 
