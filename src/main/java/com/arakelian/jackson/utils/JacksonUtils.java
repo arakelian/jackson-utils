@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,6 +37,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -67,8 +68,8 @@ public class JacksonUtils {
     }
 
     /**
-     * Allow clients to override the serializer factory globally; very useful if client want to use a
-     * Spring-aware serializer
+     * Allow clients to override the serializer factory globally; very useful if client want to use
+     * a Spring-aware serializer
      **/
     static final Set<Module> GLOBAL_MODULES;
 
@@ -156,6 +157,13 @@ public class JacksonUtils {
 
     public static String toString(final Object value, final boolean pretty) throws JsonProcessingException {
         return value == null ? StringUtils.EMPTY : builder().pretty(pretty).build().toString(value);
+    }
+
+    public static ObjectMapper withView(final ObjectMapper mapper, final Class<?> view) {
+        mapper.enable(MapperFeature.DEFAULT_VIEW_INCLUSION);
+        mapper.setConfig(mapper.getSerializationConfig().withView(view));
+        mapper.setConfig(mapper.getDeserializationConfig().withView(view));
+        return mapper;
     }
 
     private JacksonUtils() {

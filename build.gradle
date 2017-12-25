@@ -56,4 +56,5 @@ dependencies {
 
     // for unit testing
     testCompile 'junit:junit:4.12'
+    testCompile 'net.javacrumbs.json-unit:json-unit:1.25.1'
 }
