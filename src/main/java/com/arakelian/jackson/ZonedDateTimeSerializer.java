@@ -31,8 +31,19 @@ public class ZonedDateTimeSerializer extends StdSerializer<ZonedDateTime> {
         super(ZonedDateTime.class);
     }
 
+    /**
+     * Serializes the given <code>ZonedDateTime</code> in a format that is readable by commonly use
+     * libraries.
+     * 
+     * @see <a
+     *      href="http://www.joda.org/joda-time/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateOptionalTimeParser--">dateOptionalTimeParser</a>
+     * @see <a
+     *      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html#mapping-date-format">strict_date_optional_time</a>
+     */
     @Override
-    public void serialize(final ZonedDateTime date, final JsonGenerator generator,
+    public void serialize(
+            final ZonedDateTime date,
+            final JsonGenerator generator,
             final SerializerProvider provider) throws IOException, JsonProcessingException {
         generator.writeString(date != null ? DateUtils.toStringIsoFormat(date) : null);
     }
