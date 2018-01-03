@@ -28,7 +28,7 @@ Add the following to your `pom.xml`:
     <groupId>com.arakelian</groupId>
     <artifactId>jackson-utils</artifactId>
     <version>1.6.2</version>
-    <scope>test</scope>
+    <scope>compile</scope>
 </dependency>
 ```
 
