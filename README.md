@@ -42,7 +42,7 @@ repositories {
 }
 
 dependencies {
-  testCompile 'com.arakelian:jackson-utils:1.6.2'
+  compile 'com.arakelian:jackson-utils:1.6.2'
 }
 ```
 
