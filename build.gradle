@@ -50,9 +50,13 @@ multitool {
 dependencies {
     processor 'org.immutables:value:2.5.6'
 
-    // common stuff
     compile 'com.arakelian:more-commons:1.6.6'
+
+    // shadow Guava due to frequent downstream incompatibility issues
     shadow  'com.google.guava:guava:23.4-jre'
+
+    // shadow because we use very few classes from here and don't want to create
+    // unnecessary downstream dependencies
     shadow  'org.apache.commons:commons-lang3:3.7'
 
     // using Jackson feature set which requires Java 8+
