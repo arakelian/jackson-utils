@@ -24,20 +24,36 @@ plugins {
 
     // for deployment to Maven Central
     id "io.codearte.nexus-staging" version "0.11.0"
+
+    // for building fat jar
+    id "com.github.johnrengelman.shadow" version "2.0.2"
+
+    // useful utilities
+    id "com.arakelian.multitool" version "1.1.4"
 }
 
 group   = 'com.arakelian'
 
-// common gradle code shared between projects
-apply from: "gradle/core.gradle"
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.4.1'
+}
+
+multitool {
+    relocates += [
+        'org.apache.commons'     : 'repackaged.com.arakelian.jackson.org.apache.commons',
+        'com.google.common'      : 'repackaged.com.arakelian.jackson.com.google.common',
+        'com.google.thirdparty'  : 'repackaged.com.arakelian.jackson.com.google.thirdparty',
+        'javax.annotation'       : 'repackaged.com.arakelian.jackson.javax.annotation',
+    ]
+}
 
 dependencies {
     processor 'org.immutables:value:2.5.6'
 
     // common stuff
-    compile 'com.arakelian:more-commons:[1.5,2.0['
-    compile 'com.google.guava:guava:23.4-jre'
-    compile 'org.apache.commons:commons-lang3:3.7'
+    compile 'com.arakelian:more-commons:1.6.5'
+    shadow  'com.google.guava:guava:23.4-jre'
+    shadow  'org.apache.commons:commons-lang3:3.7'
 
     // using Jackson feature set which requires Java 8+
     compile 'com.fasterxml.jackson.core:jackson-core:2.8.10'
