@@ -18,6 +18,8 @@
 package com.arakelian.jackson.utils;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -45,6 +47,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class JacksonUtils {
+    @FunctionalInterface
+    public interface JsonGeneratorCallback {
+        public void accept(JsonGenerator gen) throws IOException;
+    }
+
     private static ObjectMapper DEFAULT_MAPPER;
 
     static {
@@ -153,6 +160,39 @@ public class JacksonUtils {
      */
     public static Map toMap(final Object value, final Locale locale) {
         return builder().locale(locale).build().mapper().convertValue(value, LinkedHashMap.class);
+    }
+
+    public static String toString(final JsonGeneratorCallback callback) throws UncheckedIOException {
+        return toString(callback, getObjectMapper(), true);
+    }
+
+    public static String toString(
+            final JsonGeneratorCallback callback,
+            final ObjectMapper mapper,
+            final boolean pretty) throws UncheckedIOException {
+
+        final StringWriter out = new StringWriter();
+
+        if (pretty) {
+            try (final JsonGenerator writer = mapper.getFactory() //
+                    .createGenerator(out) //
+                    .useDefaultPrettyPrinter()) {
+                callback.accept(writer);
+            } catch (final IOException e) {
+                // shouldn't happen when writing to a String
+                throw new UncheckedIOException(e);
+            }
+        } else {
+            try (final JsonGenerator writer = mapper.getFactory().createGenerator(out)) {
+                callback.accept(writer);
+            } catch (final IOException e) {
+                // shouldn't happen when writing to a String
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        final String result = out.getBuffer().toString();
+        return result;
     }
 
     public static String toString(final Object value, final boolean pretty) throws JsonProcessingException {
