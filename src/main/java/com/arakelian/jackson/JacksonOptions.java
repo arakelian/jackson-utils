@@ -31,10 +31,10 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Sets;
 
 public final class JacksonOptions {
-    private static LoadingCache<JacksonOptions, JsonProcessors> MAPPER_CACHE = CacheBuilder.newBuilder()
-            .maximumSize(Integer.MAX_VALUE).build(new CacheLoader<JacksonOptions, JsonProcessors>() {
+    private static LoadingCache<JacksonOptions, JacksonProcessors> MAPPER_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(Integer.MAX_VALUE).build(new CacheLoader<JacksonOptions, JacksonProcessors>() {
                 @Override
-                public JsonProcessors load(final JacksonOptions opts) {
+                public JacksonProcessors load(final JacksonOptions opts) {
                     // same configuration as default mapper, but with different locale
                     final ObjectMapper mapper = opts.defaultMapper != null ? opts.defaultMapper.copy()
                             : new ObjectMapper();
@@ -62,7 +62,7 @@ public final class JacksonOptions {
                     } else {
                         writer = pretty ? mapper.writerWithDefaultPrettyPrinter() : mapper.writer();
                     }
-                    return new JsonProcessors(mapper, writer);
+                    return new JacksonProcessors(mapper, writer);
                 }
             });
     private Locale locale;
@@ -88,7 +88,7 @@ public final class JacksonOptions {
         }
     }
 
-    public JsonProcessors build() {
+    public JacksonProcessors build() {
         sealed = true;
         return MAPPER_CACHE.getUnchecked(this);
     }

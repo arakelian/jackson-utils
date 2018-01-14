@@ -33,6 +33,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import net.javacrumbs.jsonunit.JsonAssert;
+
 public class JacksonUtilsTest {
     public static enum Gender {
         MALE, FEMALE;
@@ -186,7 +188,7 @@ public class JacksonUtilsTest {
         final ImmutableBean immutableBean = StringUtils
                 .isEmpty("{\"firstName\":\"Greg\",\"lastName\":\"Arakelian\",\"gender\":\"maLE\"}")
                         ? null
-                        : JacksonUtils.getJsonProcessors().readValue(
+                        : JacksonUtils.readValue(
                                 "{\"firstName\":\"Greg\",\"lastName\":\"Arakelian\",\"gender\":\"maLE\"}",
                                 ImmutableBean.class);
         assertNotNull(immutableBean);
@@ -220,6 +222,14 @@ public class JacksonUtilsTest {
         assertEquals(expected, JacksonUtils.builder().view(Views.Private.class).build().toString(bean));
     }
 
+    @Test
+    public void testToJson() {
+        JsonAssert.assertJsonEquals(
+                "{\"one\":1,\"two\":2,\"three\":3.0}",
+                JacksonUtils.toJson("one", 1, "two", 2, "three", Double.valueOf(3)));
+        JsonAssert.assertJsonEquals("{}", JacksonUtils.toJson());
+    }
+
     private void verifyDateSerialization(final String dateString, final ZonedDateTime expected)
             throws IOException {
         // serialize and confirm we have expected value
@@ -227,8 +237,7 @@ public class JacksonUtilsTest {
         assertEquals("{\"zonedDateTime\":\"" + dateString + "\"}", json);
 
         // deserialize and confirm we have same ZonedDateTime
-        final TimeBean bean = StringUtils.isEmpty(json) ? null
-                : JacksonUtils.getJsonProcessors().readValue(json, TimeBean.class);
+        final TimeBean bean = StringUtils.isEmpty(json) ? null : JacksonUtils.readValue(json, TimeBean.class);
         assertEquals(expected.withZoneSameInstant(ZoneOffset.UTC), bean.getZonedDateTime());
 
         // serialize again and confirm we get back same date

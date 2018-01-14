@@ -21,30 +21,37 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.arakelian.jackson.EnumUppercaseDeserializerModifier;
 import com.arakelian.jackson.JacksonOptions;
-import com.arakelian.jackson.JsonProcessors;
+import com.arakelian.jackson.JacksonProcessors;
 import com.arakelian.jackson.TrimWhitespaceDeserializer;
 import com.arakelian.jackson.ZonedDateTimeDeserializer;
 import com.arakelian.jackson.ZonedDateTimeSerializer;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.type.MapType;
+import com.google.common.base.Preconditions;
 
 public class JacksonUtils {
     @FunctionalInterface
@@ -130,10 +137,10 @@ public class JacksonUtils {
     }
 
     public static <T> T convertValue(final Object value, final Class<T> type) {
-        return getJsonProcessors().convertValue(value, type);
+        return getJsonProcessors().mapper().convertValue(value, type);
     }
 
-    public static JsonProcessors getJsonProcessors() {
+    public static JacksonProcessors getJsonProcessors() {
         return builder().build();
     }
 
@@ -145,8 +152,77 @@ public class JacksonUtils {
         return builder().pretty(pretty).build().writer();
     }
 
-    public static String keyValuesToJson(final boolean pretty, final Object... keyValues) throws IOException {
-        return builder().pretty(pretty).build().keyValuesToJson(keyValues);
+    public static <T> T readValue(final ObjectMapper mapper, final String json, final Class<T> type)
+            throws IOException {
+        Preconditions.checkArgument(mapper != null, "mapper must be non-null");
+        Preconditions.checkArgument(type != null, "type must be non-null");
+        return StringUtils.isEmpty(json) ? null : mapper.readValue(json, type);
+    }
+
+    @SuppressWarnings("TypeParameterUnusedInFormals")
+    public static <T> T readValue(final ObjectMapper mapper, final String json, final JavaType type)
+            throws IOException {
+        Preconditions.checkArgument(mapper != null, "mapper must be non-null");
+        Preconditions.checkArgument(type != null, "type must be non-null");
+        return StringUtils.isEmpty(json) ? null : mapper.readValue(json, type);
+    }
+
+    public static <T> T readValue(final ObjectMapper mapper, final String json, final TypeReference<T> type)
+            throws IOException {
+        Preconditions.checkArgument(mapper != null, "mapper must be non-null");
+        Preconditions.checkArgument(type != null, "type must be non-null");
+        return StringUtils.isEmpty(json) ? null : mapper.readValue(json, type);
+    }
+
+    public static <T> T readValue(final String json, final Class<T> type) throws IOException {
+        return readValue(getObjectMapper(), json, type);
+    }
+
+    public static String toJson(final Object... keyValues) {
+        return toJson(getObjectMapper(), keyValues);
+    }
+
+    public static String toJson(final ObjectMapper mapper, final Object... keyValues) {
+        Preconditions.checkArgument(mapper != null, "mapper must be non-null");
+
+        final int length = keyValues.length;
+        Preconditions.checkArgument(
+                length % 2 == 0,
+                "Expected key-value pairs, but received array with odd number of entries");
+
+        return toString(gen -> {
+            gen.writeStartObject();
+            for (int i = 0; i < length;) {
+                final String key = Objects.toString(keyValues[i++], null);
+                if (key == null) {
+                    continue;
+                }
+                final Object value = keyValues[i++];
+                if (value != null) {
+                    gen.writeObjectField(key, value);
+                }
+            }
+            gen.writeEndObject();
+        }, mapper, true);
+    }
+
+    public static JsonNode toJsonNode(final Object... keyValues) {
+        return toJsonNode(getObjectMapper(), keyValues);
+    }
+
+    public static JsonNode toJsonNode(final ObjectMapper mapper, final Object... keyValues) {
+        final String json = toJson(mapper, keyValues);
+        try {
+            return mapper.readValue(json, JsonNode.class);
+        } catch (final IOException e) {
+            // should not happen since we serialized JSON ourselves
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> convertValueToMap(final Object value) {
+        return getObjectMapper().convertValue(value, LinkedHashMap.class);
     }
 
     /**
@@ -174,10 +250,10 @@ public class JacksonUtils {
         final StringWriter out = new StringWriter();
 
         if (pretty) {
-            try (final JsonGenerator writer = mapper.getFactory() //
+            try (final JsonGenerator gen = mapper.getFactory() //
                     .createGenerator(out) //
                     .useDefaultPrettyPrinter()) {
-                callback.accept(writer);
+                callback.accept(gen);
             } catch (final IOException e) {
                 // shouldn't happen when writing to a String
                 throw new UncheckedIOException(e);
@@ -208,5 +284,22 @@ public class JacksonUtils {
 
     private JacksonUtils() {
         // utility class
+    }
+
+    public <K, V> Map<K, V> readValueAsMap(
+            final ObjectMapper mapper,
+            final String json,
+            final Class<K> keyType,
+            final Class<V> valueType) throws IOException {
+        Preconditions.checkArgument(mapper != null, "mapper must be non-null");
+        Preconditions.checkArgument(keyType != null, "keyType must be non-null");
+        Preconditions.checkArgument(valueType != null, "valueType must be non-null");
+
+        if (StringUtils.isEmpty(json)) {
+            return Collections.<K, V> emptyMap();
+        }
+        final MapType type = mapper.getTypeFactory()
+                .constructMapType(LinkedHashMap.class, keyType, valueType);
+        return mapper.readValue(json, type);
     }
 }
