@@ -17,8 +17,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class JacksonTestUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonTestUtils.class);
 
-    public static <T> T testReadWrite(final T expected, final Class<T> clazz) throws IOException {
-        return testReadWrite(null, expected, clazz);
+    private static ObjectMapper configure(ObjectMapper objectMapper) {
+        // configure object mapper
+        if (objectMapper == null) {
+            objectMapper = JacksonUtils.getObjectMapper();
+        }
+        objectMapper = objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        return objectMapper;
     }
 
     public static <T> T testReadWrite(ObjectMapper objectMapper, final T expected, final Class<T> clazz)
@@ -34,18 +39,13 @@ public class JacksonTestUtils {
         assertEquals(expected, actual);
 
         // serialize the clone and make sure it matches original
-        String reserializedJson = objectMapper.writeValueAsString(actual);
+        final String reserializedJson = objectMapper.writeValueAsString(actual);
         LOGGER.info("Reserialized JSON:\n{}", reserializedJson);
         assertJsonEquals(expectedJson, reserializedJson);
         return actual;
     }
 
-    private static ObjectMapper configure(ObjectMapper objectMapper) {
-        // configure object mapper
-        if (objectMapper == null) {
-            objectMapper = JacksonUtils.getObjectMapper();
-        }
-        objectMapper = objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-        return objectMapper;
+    public static <T> T testReadWrite(final T expected, final Class<T> clazz) throws IOException {
+        return testReadWrite(null, expected, clazz);
     }
 }

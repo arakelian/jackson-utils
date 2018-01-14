@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -158,19 +158,24 @@ public class JacksonUtilsTest {
     @Test
     public void testDateSerialization() throws IOException {
         // UTC dates
-        verifyDateSerialization("2016-12-21T16:46:39.830000000Z",
+        verifyDateSerialization(
+                "2016-12-21T16:46:39.830000000Z",
                 ZonedDateTime.of(2016, 12, 21, 16, 46, 39, 830000000, ZoneOffset.UTC));
-        verifyDateSerialization("2016-12-21T16:46:39.800000000Z",
+        verifyDateSerialization(
+                "2016-12-21T16:46:39.800000000Z",
                 ZonedDateTime.of(2016, 12, 21, 16, 46, 39, 800000000, ZoneOffset.UTC));
-        verifyDateSerialization("2016-12-21T16:46:39.000000000Z",
+        verifyDateSerialization(
+                "2016-12-21T16:46:39.000000000Z",
                 ZonedDateTime.of(2016, 12, 21, 16, 46, 39, 000000000, ZoneOffset.UTC));
 
         // Daylight savings not in effect so +04:00
-        verifyDateSerialization("2016-06-21T20:46:39.830000000Z",
+        verifyDateSerialization(
+                "2016-06-21T20:46:39.830000000Z",
                 ZonedDateTime.of(2016, 6, 21, 16, 46, 39, 830000000, ZoneId.of("America/New_York")));
 
         // Daylight savings is in effect so +05:00
-        verifyDateSerialization("2016-12-21T21:46:39.830000000Z",
+        verifyDateSerialization(
+                "2016-12-21T21:46:39.830000000Z",
                 ZonedDateTime.of(2016, 12, 21, 16, 46, 39, 830000000, ZoneId.of("America/New_York")));
     }
 
@@ -202,9 +207,11 @@ public class JacksonUtilsTest {
         assertEquals("{}", JacksonUtils.builder().view(Views.Empty.class).build().toString(bean));
 
         // public fields - with and without pretty formatting
-        assertEquals("{\"id\":\"100\",\"name\":\"Greg Arakelian\"}",
+        assertEquals(
+                "{\"id\":\"100\",\"name\":\"Greg Arakelian\"}",
                 JacksonUtils.builder().view(Views.Public.class).build().toString(bean));
-        assertEquals("{\n  \"id\" : \"100\",\n  \"name\" : \"Greg Arakelian\"\n}",
+        assertEquals(
+                "{\n  \"id\" : \"100\",\n  \"name\" : \"Greg Arakelian\"\n}",
                 JacksonUtils.builder().view(Views.Public.class).pretty(true).build().toString(bean));
 
         // everything (when no view used, or when private which extends public)

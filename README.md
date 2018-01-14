@@ -27,7 +27,7 @@ Add the following to your `pom.xml`:
 <dependency>
     <groupId>com.arakelian</groupId>
     <artifactId>jackson-utils</artifactId>
-    <version>1.7.1</version>
+    <version>1.7.2</version>
     <scope>compile</scope>
 </dependency>
 ```
@@ -42,7 +42,7 @@ repositories {
 }
 
 dependencies {
-  compile 'com.arakelian:jackson-utils:1.7.1'
+  compile 'com.arakelian:jackson-utils:1.7.2'
 }
 ```
 
