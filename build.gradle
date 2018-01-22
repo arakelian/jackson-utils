@@ -64,7 +64,6 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.8.10'
     compile 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.8.10'
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.8.10'
-    compile 'com.fasterxml.jackson.datatype:jackson-datatype-guava:2.8.10'
 
     // logging
     testCompile 'org.apache.logging.log4j:log4j-api:2.9.1'
