@@ -140,6 +140,11 @@ public class JacksonUtils {
         return getJsonProcessors().mapper().convertValue(value, type);
     }
 
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> convertValueToMap(final Object value) {
+        return getObjectMapper().convertValue(value, LinkedHashMap.class);
+    }
+
     public static JacksonProcessors getJsonProcessors() {
         return builder().build();
     }
@@ -218,11 +223,6 @@ public class JacksonUtils {
             // should not happen since we serialized JSON ourselves
             throw new UncheckedIOException(e);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Map<String, Object> convertValueToMap(final Object value) {
-        return getObjectMapper().convertValue(value, LinkedHashMap.class);
     }
 
     /**

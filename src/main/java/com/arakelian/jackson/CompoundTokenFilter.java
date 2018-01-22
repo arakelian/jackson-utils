@@ -99,29 +99,6 @@ public class CompoundTokenFilter extends TokenFilter {
         return true;
     }
 
-    private TokenFilter filter(final Function<TokenFilter, TokenFilter> function) {
-        switch (type) {
-        case NULL:
-            return null;
-        case INCLUDE_ALL:
-            return TokenFilter.INCLUDE_ALL;
-        case MIX:
-            break;
-        }
-
-        final TokenFilter[] newFilters = new TokenFilter[filters.length];
-        for (int i = 0, size = filters.length; i < size; i++) {
-            final TokenFilter filter = filters[i];
-            newFilters[i] = filter != null ? function.apply(filter) : null;
-        }
-
-        if (Arrays.equals(filters, newFilters)) {
-            return this;
-        }
-
-        return CompoundTokenFilter.of(newFilters);
-    }
-
     @Override
     public TokenFilter filterStartArray() {
         return filter(filter -> filter.filterStartArray());
@@ -232,6 +209,29 @@ public class CompoundTokenFilter extends TokenFilter {
         } catch (final UncheckedIOException e) {
             throw e.getCause();
         }
+    }
+
+    private TokenFilter filter(final Function<TokenFilter, TokenFilter> function) {
+        switch (type) {
+        case NULL:
+            return null;
+        case INCLUDE_ALL:
+            return TokenFilter.INCLUDE_ALL;
+        case MIX:
+            break;
+        }
+
+        final TokenFilter[] newFilters = new TokenFilter[filters.length];
+        for (int i = 0, size = filters.length; i < size; i++) {
+            final TokenFilter filter = filters[i];
+            newFilters[i] = filter != null ? function.apply(filter) : null;
+        }
+
+        if (Arrays.equals(filters, newFilters)) {
+            return this;
+        }
+
+        return CompoundTokenFilter.of(newFilters);
     }
 
     private boolean scalar(final ScalarFunction function) {
