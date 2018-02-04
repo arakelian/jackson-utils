@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.arakelian.jackson;
+package com.arakelian.jackson.databind;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;

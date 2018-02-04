@@ -31,12 +31,12 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.arakelian.jackson.EnumUppercaseDeserializerModifier;
 import com.arakelian.jackson.JacksonOptions;
 import com.arakelian.jackson.JacksonProcessors;
-import com.arakelian.jackson.TrimWhitespaceDeserializer;
-import com.arakelian.jackson.ZonedDateTimeDeserializer;
-import com.arakelian.jackson.ZonedDateTimeSerializer;
+import com.arakelian.jackson.databind.EnumUppercaseDeserializerModifier;
+import com.arakelian.jackson.databind.TrimWhitespaceDeserializer;
+import com.arakelian.jackson.databind.ZonedDateTimeDeserializer;
+import com.arakelian.jackson.databind.ZonedDateTimeSerializer;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
