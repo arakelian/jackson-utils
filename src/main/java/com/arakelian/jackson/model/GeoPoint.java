@@ -50,18 +50,27 @@ public abstract class GeoPoint implements Serializable {
             final JsonNode node = ctxt.readValue(p, JsonNode.class);
             if (node instanceof ObjectNode) {
                 final ObjectNode obj = (ObjectNode) node;
+                final JsonNode lat = obj.get("lat");
+                final JsonNode lon = obj.get("lon");
+                if (lat == null || lon == null) {
+                    // always throws exception
+                    ctxt.reportMappingException("Expecting object with 'lat' and 'lon' fields");
+                    return null;
+                }
                 return ImmutableGeoPoint.builder() //
-                        .lat(obj.path("lat").asDouble()) //
-                        .lon(obj.path("lon").asDouble()) //
+                        .lat(lat.asDouble()) //
+                        .lon(lon.asDouble()) //
                         .build();
             }
 
             if (node instanceof ArrayNode) {
                 final ArrayNode arr = (ArrayNode) node;
                 if (arr.size() != 2) {
+                    // always throws exception
                     ctxt.reportMappingException(
                             "Expecting array with 2 elements but found %s elements",
                             arr.size());
+                    return null;
                 }
                 return ImmutableGeoPoint.builder() //
                         .lon(arr.get(0).asDouble()) //
@@ -75,6 +84,7 @@ public abstract class GeoPoint implements Serializable {
                 return of(v);
             }
 
+            // always throws exception
             ctxt.reportMappingException("Expecting array, object or text node");
             return null;
         }

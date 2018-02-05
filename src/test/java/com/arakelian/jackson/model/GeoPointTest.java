@@ -28,6 +28,7 @@ import org.junit.Test;
 import com.arakelian.core.utils.SerializableTestUtils;
 import com.arakelian.jackson.utils.JacksonTestUtils;
 import com.arakelian.jackson.utils.JacksonUtils;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GeoPointTest {
@@ -67,6 +68,15 @@ public class GeoPointTest {
         testJackson("{ \n" + //
                 "    \"lat\": 41.12,\n" + //
                 "    \"lon\": -71.34\n" + //
+                "  }", 41.12d, -71.34d);
+    }
+
+    @Test(expected = JsonMappingException.class)
+    public void testInvalidGeoPointJson() throws IOException {
+        // should be 'lat' and 'lon' (not 'lng')
+        testJackson("{ \n" + //
+                "    \"lat\": 41.12,\n" + //
+                "    \"lng\": -71.34\n" + //
                 "  }", 41.12d, -71.34d);
     }
 
