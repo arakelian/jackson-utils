@@ -192,6 +192,10 @@ public abstract class GeoPoint implements Serializable {
             lon = deinterleave(mortonHash) / LON_SCALE - MAX_LON_INCL;
         }
 
+        return of(lat, lon);
+    }
+
+    public static GeoPoint of(final double lat, final double lon) {
         return ImmutableGeoPoint.builder() //
                 .lat(lat) //
                 .lon(lon) //
@@ -298,10 +302,7 @@ public abstract class GeoPoint implements Serializable {
             return this;
         }
 
-        return ImmutableGeoPoint.builder() //
-                .lat(newLat) //
-                .lon(newLon) //
-                .build();
+        return of(newLat, newLon);
     }
 
     @Value.Check

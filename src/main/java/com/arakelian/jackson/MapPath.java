@@ -19,9 +19,9 @@ package com.arakelian.jackson;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -91,13 +91,8 @@ public class MapPath {
         this(JacksonUtils.readValue(json, Map.class), mapper);
     }
 
-    public <T> T get(final String path, final Class<T> clazz) {
-        return get(path, clazz, null);
-    }
-
-    public <T> T get(final String path, final Class<T> clazz, final T defaultValue) {
-        Preconditions.checkArgument(clazz != null, "clazz must be non-null");
-        if (map == null || map.size() == 0) {
+    public <R> R find(final String path, final Function<Object, R> function, final R defaultValue) {
+        if (map == null || map.size() == 0 || StringUtils.isEmpty(path)) {
             return defaultValue;
         }
 
@@ -106,33 +101,38 @@ public class MapPath {
 
         // traverse path
         final int length = path.length();
-        for (int start = length > 0 && path.charAt(0) == PATH_SEPARATOR ? 1 : 0; start < length;) {
-            final int next = path.indexOf(PATH_SEPARATOR, start);
-            final boolean lastSegment = next == -1;
-            final int end = lastSegment ? length : next;
-            final String segment = path.substring(start, end);
+        for (int start = length > 0 && path.charAt(0) == PATH_SEPARATOR ? 1 : 0; start < length; start++) {
+            final String segment = getSegment(path, start, map);
+            start += segment.length();
+            final boolean lastSegment = start >= length;
 
             final Object value = map.get(segment);
+            if (lastSegment) {
+                return function.apply(value);
+            }
             if (value == null) {
                 return defaultValue;
             }
-            if (lastSegment) {
-                // use Jackson to do type conversion!
-                return mapper.convertValue(value, clazz);
-            }
             if (!(value instanceof Map)) {
-                throw new IllegalArgumentException("Expected \"" + path.substring(0, end) + "\" of path \""
+                throw new IllegalArgumentException("Expected \"" + path.substring(0, start) + "\" of path \""
                         + path + "\" to resolve to Map but was " + value.getClass().getSimpleName());
             }
 
-            map = map.getClass().cast(value);
-            start = next + 1;
+            map = Map.class.cast(value);
         }
         return defaultValue;
     }
 
-    public Collection getCollection(final String path) {
-        return get(path, Collection.class);
+    public <T> T get(final String path, final Class<T> clazz) {
+        return get(path, clazz, null);
+    }
+
+    public <T> T get(final String path, final Class<T> clazz, final T defaultValue) {
+        Preconditions.checkArgument(clazz != null, "clazz must be non-null");
+        final T result = find(path, value -> {
+            return value != null ? mapper.convertValue(value, clazz) : defaultValue;
+        }, defaultValue);
+        return result;
     }
 
     public Double getDouble(final String path) {
@@ -169,5 +169,25 @@ public class MapPath {
 
     public ZonedDateTime getZonedDateTime(final String path) {
         return get(path, ZonedDateTime.class);
+    }
+
+    public boolean hasProperty(final String path) {
+        return find(path, value -> value != null, false);
+    }
+
+    protected String getSegment(final String path, final int start, final Map map) {
+        final int length = path.length();
+
+        for (int i = start; i < length; i++) {
+            final char ch = path.charAt(i);
+            if (ch == '/' || ch == '.') {
+                final String segment = path.substring(start, i);
+                if (map.containsKey(segment)) {
+                    return segment;
+                }
+            }
+        }
+
+        return path.substring(start);
     }
 }

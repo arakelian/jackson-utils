@@ -17,9 +17,12 @@
 
 package com.arakelian.jackson;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,7 +45,7 @@ public class MapPathTest {
             "    \"birthday\" : \"2000-12-25T16:46Z\",\n" + //
             "    \"age\" : 18\n" + //
             "  },\n" + //
-            "  \"matched_queries\" : [\n" + //
+            "  \"matched.queries\" : [\n" + //
             "    \"ids_query\"\n" + //
             "  ]\n" + //
             "}\n";
@@ -55,14 +58,35 @@ public class MapPathTest {
     }
 
     @Test
-    public void testMapPath() {
-        Assert.assertEquals("GREG", mapPath.getString("_source/firstName"));
-        Assert.assertEquals(1.0d, mapPath.getDouble("_score"), 0.001d);
-        Assert.assertEquals(Integer.valueOf(18), mapPath.getInt("_source/age"));
-        Assert.assertEquals(GeoPoint.of("41.12,-71.34"), mapPath.getGeoPoint("_source/location"));
-        Assert.assertEquals(
+    public void testConversion() {
+        // slash and dot should be equivalent
+        assertEquals("GREG", mapPath.getString("_source/firstName"));
+        assertEquals("GREG", mapPath.getString("_source.firstName"));
+
+        // should be able to retrieve double
+        assertEquals(1.0d, mapPath.getDouble("_score"), 0.001d);
+
+        // should be able to retrieve int
+        assertEquals(Integer.valueOf(18), mapPath.getInt("_source/age"));
+        assertEquals(Integer.valueOf(18), mapPath.getInt("_source.age"));
+
+        // should handle GeoPoint deserialization
+        assertEquals(GeoPoint.of("41.12,-71.34"), mapPath.getGeoPoint("_source/location"));
+
+        // should handle ZonedDateTime deserialization
+        assertEquals(
                 DateUtils.toZonedDateTimeUtc("2000-12-25T16:46Z"),
                 mapPath.getZonedDateTime("_source/birthday"));
-        Assert.assertEquals(ImmutableList.of("ids_query"), mapPath.getList("matched_queries"));
+
+        // should handle arrays as List
+        assertEquals(ImmutableList.of("ids_query"), mapPath.getList("matched.queries"));
+    }
+
+    @Test
+    public void testHasProperty() {
+        assertTrue(mapPath.hasProperty("_source/id"));
+        assertTrue(mapPath.hasProperty("_source.id"));
+        assertTrue(mapPath.hasProperty("matched.queries"));
+        assertFalse(mapPath.hasProperty("_source/id_missing"));
     }
 }
