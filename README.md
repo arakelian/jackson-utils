@@ -5,7 +5,7 @@ Utilities for reading and writing JSON and XML using Jackson.
 
 ## Enumerated Types
 
-When deserializating strings into Java `Enum` types, it's useful to be able to accept lowercase, uppercase and mixed cased string value.
+When deserializating strings into Java `Enum` types, it's useful to be able to accept lowercase, uppercase and mixed-cased string input.
 
 This deserializer attempts to coerce the string value using the provided case first, but then falls back to UPPERCASE or lowercase if needed.
 
@@ -53,9 +53,9 @@ objectMapper.registerModule(new SimpleModule()
 
 This library exposes an immutable `GeoPoint` class that represents a lat/lon coordinate.  `GeoPoint` supports a
 variety of serialization and deserialization options, which happen to be compatible with those used by
-[Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html)
+[Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html).
 
-### Object with latitude and longitude fields
+### Latitude and longitude fields
 
 ```json
 "location": {
@@ -74,6 +74,80 @@ variety of serialization and deserialization options, which happen to be compati
 
 ```json
 "location": "drm3btev3e86"
+```
+
+
+## MapPath
+
+When deserializing JSON that does not have to a fixed schema, it's sometimes very useful to deserialize JSON to native Java objects like `Map` and `List`
+instead using Jackson's tree structure (e.g. `JsonNode`).
+
+When we do this however we lose the ability to traverse our `Map` in a easy way.  
+
+Enter `MapPath`, which is loosely inspired by [JsonPath](https://github.com/json-path/JsonPath).
+
+Let's assume the following JSON input:
+
+```java
+{
+  "store": {
+    "book": [
+      {
+        "category": "reference",
+        "author": "Nigel Rees",
+        "title": "Sayings of the Century",
+        "price": 8.95
+      },
+      {
+        "category": "fiction",
+        "author": "Evelyn Waugh",
+        "title": "Sword of Honour",
+        "price": 12.99
+      },
+      {
+        "category": "fiction",
+        "author": "Herman Melville",
+        "title": "Moby Dick",
+        "isbn": "0-553-21311-3",
+        "price": 8.99
+      },
+      {
+        "category": "fiction",
+        "author": "J. R. R. Tolkien",
+        "title": "The Lord of the Rings",
+        "isbn": "0-395-19395-8",
+        "price": 22.99
+      }
+    ],
+    "bicycle": {
+      "color": "red",
+      "price": 19.95
+    }
+  },
+  "expensive": 10
+}
+```
+
+Let's use Jackson to parse this JSON into a Map.
+
+```java
+String json = "...see above...";
+Map map = objectMapper.readValue(json, Map.class);
+```
+
+Let's wrap the Map using `MapPath`
+
+```java
+MapPath mapPath = MapPath.of(map);
+```
+
+
+Now we can traverse the properties of the map very easily:
+
+```java
+   mapPath.getString("store.bicycle.color")    ' red
+   mapPath.getDouble("store.bicycle.price")    ' 19.95
+   mapPath.getInt("expensive")                 ' 10
 ```
 
 
