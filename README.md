@@ -5,24 +5,28 @@ Utilities for reading and writing JSON and XML using Jackson.
 
 ## Enumerated Types
 
-When deserializating strings into Java enumerated types (`Enum`), it's useful to accept lowercase, uppercase and mixed cased string value.
+When deserializating strings into Java `Enum` types, it's useful to be able to accept lowercase, uppercase and mixed cased string value.
+
+This deserializer attempts to coerce the string value using the provided case first, but then falls back to UPPERCASE or lowercase if needed.
 
 ```java
-    objectMapper.registerModule(new SimpleModule()
-                .setDeserializerModifier(new EnumUppercaseDeserializerModifier()));
-``` 
+objectMapper.registerModule(new SimpleModule()
+        .setDeserializerModifier(new EnumUppercaseDeserializerModifier()));
+```
 
 
 ## Trimming Whitespace
 
 When deserializing string values, it's useful to automatically trim leading and trailing whitespace including newlines, tabs, etc.
 
+This deserializer uses the `Character.isWhitespace(char)` function to determine what is whitespace.
+
 ```java
-    objectMapper.registerModule(new SimpleModule()
-                .addDeserializer(String.class, TrimWhitespaceDeserializer.SINGLETON));
+objectMapper.registerModule(new SimpleModule()
+        .addDeserializer(String.class, TrimWhitespaceDeserializer.SINGLETON));
 ```
 
- 
+
 ## ZonedDateTime
 
 When serializing and deserializing ZonedDateTime values, it's useful to accept a wide variety of string formats.
@@ -39,22 +43,22 @@ In addition to the widely-supported ISO date format, you also get variety of oth
 * MMMM dd, yyyy
 
 ```java
-    objectMapper.registerModule(new SimpleModule()
-                .addSerializer(new ZonedDateTimeSerializer()) //
-                .addDeserializer(ZonedDateTime.class, new ZonedDateTimeDeserializer());
+objectMapper.registerModule(new SimpleModule()
+        .addSerializer(new ZonedDateTimeSerializer()) //
+        .addDeserializer(ZonedDateTime.class, new ZonedDateTimeDeserializer());
 ```
 
 
 ## GeoPoint
 
 This library exposes an immutable `GeoPoint` class that represents a lat/lon coordinate.  `GeoPoint` supports a
-variety of serialization and deserialization options, which happen to be compatible with those used by 
+variety of serialization and deserialization options, which happen to be compatible with those used by
 [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html)
 
 ### Object with latitude and longitude fields
 
 ```json
-"location": { 
+"location": {
   "lat": 41.12,
   "lon": -71.34
 }
@@ -71,6 +75,7 @@ variety of serialization and deserialization options, which happen to be compati
 ```json
 "location": "drm3btev3e86"
 ```
+
 
 ## Installation
 
