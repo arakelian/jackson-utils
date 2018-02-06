@@ -2,8 +2,9 @@
 
 Utilities for reading and writing JSON and XML using Jackson.
 
+## Serialization and Deserialization
 
-## Enumerated Types
+### Enumerated Types
 
 When deserializating strings into Java `Enum` types, it's useful to be able to accept lowercase, uppercase and mixed-cased string input.
 
@@ -15,7 +16,7 @@ objectMapper.registerModule(new SimpleModule()
 ```
 
 
-## Trimming Whitespace
+### Trimming Whitespace
 
 When deserializing string values, it's useful to automatically trim leading and trailing whitespace including newlines, tabs, etc.
 
@@ -27,7 +28,7 @@ objectMapper.registerModule(new SimpleModule()
 ```
 
 
-## ZonedDateTime
+### ZonedDateTime
 
 When serializing and deserializing ZonedDateTime values, it's useful to accept a wide variety of string formats.
 
@@ -49,13 +50,13 @@ objectMapper.registerModule(new SimpleModule()
 ```
 
 
-## GeoPoint
+### GeoPoint
 
 This library exposes an immutable `GeoPoint` class that represents a lat/lon coordinate.  `GeoPoint` supports a
 variety of serialization and deserialization options, which happen to be compatible with those used by
 [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html).
 
-### Latitude and longitude fields
+#### Latitude and longitude fields
 
 ```json
 "location": {
@@ -64,13 +65,13 @@ variety of serialization and deserialization options, which happen to be compati
 }
 ```
 
-### Comma separated latitude and longitude
+#### Comma separated latitude and longitude
 
 ```json
 "location": "41.12,-71.34"
 ```
 
-### Geohash
+#### Geohash
 
 ```json
 "location": "drm3btev3e86"
@@ -79,12 +80,11 @@ variety of serialization and deserialization options, which happen to be compati
 
 ## MapPath
 
-When deserializing JSON that does not have to a fixed schema, it's sometimes very useful to deserialize JSON to native Java objects like `Map` and `List`
+When deserializing JSON that does not conform to a fixed schema, it's sometimes useful to deserialize the JSON to native Java objects like `Map` and `List`
 instead using Jackson's tree structure (e.g. `JsonNode`).
 
-When we do this however we lose the ability to traverse our `Map` in a easy way.  
-
-Enter `MapPath`, which is loosely inspired by [JsonPath](https://github.com/json-path/JsonPath).
+When we do this however we lose the ability to traverse the data in an easy way and null-safe manner. Enter `MapPath`, which is loosely 
+inspired by [JsonPath](https://github.com/json-path/JsonPath).
 
 Let's assume the following JSON input:
 
