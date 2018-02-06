@@ -153,7 +153,7 @@ Now we can traverse the properties of the map very easily:
 
 ## Installation
 
-The library is available on Maven Central
+The library is available on [Maven Central](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.arakelian%22%20AND%20a%3A%22jackson-utils%22)
 
 ### Maven
 
