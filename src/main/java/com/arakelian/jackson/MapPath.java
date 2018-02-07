@@ -27,20 +27,46 @@ import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 
+import com.arakelian.jackson.MapPath.MapPathSerializer;
 import com.arakelian.jackson.model.GeoPoint;
 import com.arakelian.jackson.utils.JacksonUtils;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 @Value.Immutable
-@JsonSerialize(as = ImmutableMapPath.class)
+@JsonSerialize(using = MapPathSerializer.class, as = ImmutableMapPath.class)
 @JsonDeserialize(builder = ImmutableMapPath.Builder.class)
 public abstract class MapPath implements Serializable {
+    /**
+     * Customize serializer that prevents 'empty' MapPath objects from being serialized
+     */
+    public static class MapPathSerializer extends StdSerializer<MapPath> {
+        public MapPathSerializer() {
+            super(MapPath.class);
+        }
+
+        @Override
+        public boolean isEmpty(final SerializerProvider provider, final MapPath value) {
+            // we don't want to serialize 'empty' MapPath objects
+            return value == null || value.getProperties().isEmpty();
+        }
+
+        @Override
+        public void serialize(final MapPath value, final JsonGenerator gen, final SerializerProvider provider)
+                throws IOException {
+            final Map<Object, Object> props = value.getProperties();
+            provider.defaultSerializeValue(props, gen);
+        }
+    }
+
     public static final char PATH_SEPARATOR = '/';
 
     private static final MapPath EMPTY = ImmutableMapPath.builder().build();
