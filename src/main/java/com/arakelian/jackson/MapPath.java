@@ -18,86 +18,85 @@
 package com.arakelian.jackson;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
+import org.immutables.value.Value;
 
 import com.arakelian.jackson.model.GeoPoint;
 import com.arakelian.jackson.utils.JacksonUtils;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-public class MapPath {
+@Value.Immutable
+@JsonSerialize(as = ImmutableMapPath.class)
+@JsonDeserialize(builder = ImmutableMapPath.Builder.class)
+public abstract class MapPath implements Serializable {
     public static final char PATH_SEPARATOR = '/';
 
-    private static final MapPath EMPTY = new MapPath(ImmutableMap.of());
+    private static final MapPath EMPTY = ImmutableMapPath.builder().build();
 
     public static MapPath of() {
         return EMPTY;
     }
 
-    public static MapPath of(final Map map) {
-        if (map == null || map.size() == 0) {
-            return MapPath.of();
-        }
-        return new MapPath(map);
+    public static MapPath of(final Map<?, ?> map) {
+        return of(map, null);
     }
 
-    public static MapPath of(final Map map, final ObjectMapper mapper) {
+    public static MapPath of(final Map<?, ?> map, final ObjectMapper mapper) {
         if (map == null || map.size() == 0) {
             return MapPath.of();
         }
-        return new MapPath(map, mapper);
+        final ImmutableMapPath mapPath = ImmutableMapPath.builder() //
+                .putAllProperties(map) //
+                .build();
+        mapPath.setObjectMapper(mapper);
+        return mapPath;
     }
 
     public static MapPath of(final String json) throws IOException {
         if (StringUtils.isEmpty(json)) {
             return MapPath.of();
         }
-        return new MapPath(json);
+        return of(json, null);
     }
 
-    public static MapPath of(final String json, final ObjectMapper mapper) throws IOException {
+    public static MapPath of(final String json, ObjectMapper mapper) throws IOException {
         if (StringUtils.isEmpty(json)) {
             return MapPath.of();
         }
-        return new MapPath(json, mapper);
+        if (mapper == null) {
+            mapper = JacksonUtils.getObjectMapper();
+        }
+        final Map<?, ?> map = mapper.readValue(json, Map.class);
+        final ImmutableMapPath mapPath = ImmutableMapPath.builder() //
+                .putAllProperties(map) //
+                .build();
+        mapPath.setObjectMapper(mapper);
+        return mapPath;
     }
 
-    private final Map map;
-
-    private final ObjectMapper mapper;
-
-    private MapPath(final Map map) {
-        this(map, map != null && map.size() != 0 ? JacksonUtils.getObjectMapper() : null);
-    }
-
-    private MapPath(final Map map, final ObjectMapper mapper) {
-        Preconditions
-                .checkArgument(map == null || map.size() == 0 || mapper != null, "mapper must be non-null");
-        this.map = map;
-        this.mapper = mapper;
-    }
-
-    private MapPath(final String json) throws IOException {
-        this(json, JacksonUtils.getObjectMapper());
-    }
-
-    private MapPath(final String json, final ObjectMapper mapper) throws IOException {
-        this(JacksonUtils.readValue(json, Map.class), mapper);
-    }
+    /** ObjectMapper that should be used for deserialization. **/
+    @SuppressWarnings("immutables")
+    private transient ObjectMapper mapper;
 
     public <R> R find(final String path, final Function<Object, R> function, final R defaultValue) {
-        if (map == null || map.size() == 0 || StringUtils.isEmpty(path)) {
+        if (getProperties().size() == 0 || StringUtils.isEmpty(path)) {
             return defaultValue;
         }
 
         // starting point
-        Map map = this.map;
+        Map map = this.getProperties();
 
         // traverse path
         final int length = path.length();
@@ -130,7 +129,7 @@ public class MapPath {
     public <T> T get(final String path, final Class<T> clazz, final T defaultValue) {
         Preconditions.checkArgument(clazz != null, "clazz must be non-null");
         final T result = find(path, value -> {
-            return value != null ? mapper.convertValue(value, clazz) : defaultValue;
+            return value != null ? getObjectMapper().convertValue(value, clazz) : defaultValue;
         }, defaultValue);
         return result;
     }
@@ -159,8 +158,31 @@ public class MapPath {
         return get(path, Long.class);
     }
 
+    public Map getMap(final String path) {
+        return get(path, Map.class);
+    }
+
+    public MapPath getMapPath(final String path) {
+        return MapPath.of(getMap(path), getObjectMapper());
+    }
+
     public Object getObject(final String path) {
         return get(path, Object.class);
+    }
+
+    @JsonIgnore
+    @Value.Lazy
+    public ObjectMapper getObjectMapper() {
+        if (mapper == null) {
+            mapper = JacksonUtils.getObjectMapper();
+        }
+        return mapper;
+    }
+
+    @JsonAnyGetter
+    @Value.Default
+    public Map<Object, Object> getProperties() {
+        return ImmutableMap.of();
     }
 
     public String getString(final String path) {
@@ -173,6 +195,10 @@ public class MapPath {
 
     public boolean hasProperty(final String path) {
         return find(path, value -> value != null, false);
+    }
+
+    public void setObjectMapper(final ObjectMapper mapper) {
+        this.mapper = mapper;
     }
 
     protected String getSegment(final String path, final int start, final Map map) {

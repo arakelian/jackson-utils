@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import com.arakelian.core.utils.DateUtils;
 import com.arakelian.jackson.model.GeoPoint;
+import com.arakelian.jackson.utils.JacksonTestUtils;
 import com.google.common.collect.ImmutableList;
 
 public class MapPathTest {
@@ -58,10 +59,16 @@ public class MapPathTest {
     }
 
     @Test
+    public void testJackson() throws IOException {
+        JacksonTestUtils.testReadWrite(mapPath, MapPath.class);
+    }
+
+    @Test
     public void testConversion() {
         // slash and dot should be equivalent
         assertEquals("GREG", mapPath.getString("_source/firstName"));
         assertEquals("GREG", mapPath.getString("_source.firstName"));
+        assertEquals("GREG", mapPath.getMap("_source").get("firstName"));
 
         // should be able to retrieve double
         assertEquals(1.0d, mapPath.getDouble("_score"), 0.001d);
