@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.arakelian.core.utils.DateUtils;
+import com.arakelian.core.utils.SerializableTestUtils;
 import com.arakelian.jackson.model.GeoPoint;
 import com.arakelian.jackson.utils.JacksonTestUtils;
 import com.google.common.collect.ImmutableList;
@@ -56,11 +57,6 @@ public class MapPathTest {
     @Before
     public void setupMap() throws IOException {
         mapPath = MapPath.of(JSON);
-    }
-
-    @Test
-    public void testJackson() throws IOException {
-        JacksonTestUtils.testReadWrite(mapPath, MapPath.class);
     }
 
     @Test
@@ -95,5 +91,17 @@ public class MapPathTest {
         assertTrue(mapPath.hasProperty("_source.id"));
         assertTrue(mapPath.hasProperty("matched.queries"));
         assertFalse(mapPath.hasProperty("_source/id_missing"));
+    }
+
+    @Test
+    public void testJackson() throws IOException {
+        JacksonTestUtils.testReadWrite(MapPath.of(), MapPath.class);
+        JacksonTestUtils.testReadWrite(mapPath, MapPath.class);
+    }
+
+    @Test
+    public void testSerializable() {
+        SerializableTestUtils.testSerializable(MapPath.of(), MapPath.class);
+        SerializableTestUtils.testSerializable(mapPath, MapPath.class);
     }
 }
