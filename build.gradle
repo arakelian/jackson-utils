@@ -50,20 +50,20 @@ multitool {
 dependencies {
     processor 'org.immutables:value:2.5.6'
 
-    compile 'com.arakelian:more-commons:1.7.2'
+    compile 'com.arakelian:more-commons:1.8.0'
 
     // shadow Guava due to frequent downstream incompatibility issues
-    shadow  'com.google.guava:guava:23.6-jre'
+    shadow  'com.google.guava:guava:24.0-jre'
 
     // shadow because we use very few classes from here and don't want to create
     // unnecessary downstream dependencies
     shadow  'org.apache.commons:commons-lang3:3.7'
 
     // using Jackson feature set which requires Java 8+
-    compile 'com.fasterxml.jackson.core:jackson-core:2.8.10'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.10'
-    compile 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.8.10'
-    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.8.10'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.8.11'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.11'
+    compile 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.8.11'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.8.11'
 
     // logging
     testCompile 'org.apache.logging.log4j:log4j-api:2.9.1'
@@ -76,5 +76,5 @@ dependencies {
     // for unit testing
     testCompile 'junit:junit:4.12'
     testCompile 'net.javacrumbs.json-unit:json-unit:1.25.1'
-    testCompile 'com.arakelian:more-commons:1.7.2:tests'
+    testCompile 'com.arakelian:more-commons:1.8.0:tests'
 }

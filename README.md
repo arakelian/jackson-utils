@@ -153,7 +153,7 @@ Now we can traverse the properties of the map very easily:
 
 ## Installation
 
-The library is available on [Maven Central](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.arakelian%22%20AND%20a%3A%22jackson-utils%22)
+The library is available on [Maven Central](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.arakelian%22%20AND%20a%3A%22jackson-utils%22).
 
 ### Maven
 
@@ -176,7 +176,7 @@ Add the following to your `pom.xml`:
 <dependency>
     <groupId>com.arakelian</groupId>
     <artifactId>jackson-utils</artifactId>
-    <version>1.8.6</version>
+    <version>1.9.0</version>
     <scope>compile</scope>
 </dependency>
 ```
@@ -191,7 +191,7 @@ repositories {
 }
 
 dependencies {
-  compile 'com.arakelian:jackson-utils:1.8.6'
+  compile 'com.arakelian:jackson-utils:1.9.0'
 }
 ```
 
