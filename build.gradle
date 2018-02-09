@@ -29,7 +29,7 @@ plugins {
     id "com.github.johnrengelman.shadow" version "2.0.2"
 
     // useful utilities
-    id "com.arakelian.multitool" version "1.3.0"
+    id "com.arakelian.multitool" version "1.4.0"
 }
 
 group   = 'com.arakelian'
@@ -45,12 +45,18 @@ multitool {
         'com.google.thirdparty'  : 'repackaged.com.arakelian.jackson.${prefix}com.google.thirdparty',
         'javax.annotation'       : 'repackaged.com.arakelian.jackson.${prefix}javax.annotation',
     ]
+    
+    proguardConfiguration {
+        keep includedescriptorclasses:true, 'class com.arakelian.** { *; }'
+
+        dontnote '**.org.apache.commons.lang3.ObjectUtils'
+    }
 }
 
 dependencies {
     processor 'org.immutables:value:2.5.6'
 
-    compile 'com.arakelian:more-commons:1.8.0'
+    compile 'com.arakelian:more-commons:1.8.1'
 
     // shadow Guava due to frequent downstream incompatibility issues
     shadow  'com.google.guava:guava:24.0-jre'
@@ -76,5 +82,5 @@ dependencies {
     // for unit testing
     testCompile 'junit:junit:4.12'
     testCompile 'net.javacrumbs.json-unit:json-unit:1.25.1'
-    testCompile 'com.arakelian:more-commons:1.8.0:tests'
+    testCompile 'com.arakelian:more-commons:1.8.1:tests'
 }
