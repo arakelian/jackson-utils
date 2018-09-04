@@ -213,7 +213,8 @@ public class JacksonUtilsTest {
                 "{\"id\":\"100\",\"name\":\"Greg Arakelian\"}",
                 JacksonUtils.builder().view(Views.Public.class).build().toString(bean));
         assertEquals(
-                "{\n  \"id\" : \"100\",\n  \"name\" : \"Greg Arakelian\"\n}",
+                "{\n  \"id\" : \"100\",\n  \"name\" : \"Greg Arakelian\"\n}"
+                        .replace("\n", System.getProperty("line.separator")),
                 JacksonUtils.builder().view(Views.Public.class).pretty(true).build().toString(bean));
 
         // everything (when no view used, or when private which extends public)
