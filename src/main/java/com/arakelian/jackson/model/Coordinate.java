@@ -262,6 +262,8 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
      *
      * @param c
      *            a <code>Coordinate</code> with which to do the 2D comparison.
+     * @param tolerance
+     *            margin of error
      * @return true if <code>other</code> is a <code>Coordinate</code> with the same values for X
      *         and Y.
      */
