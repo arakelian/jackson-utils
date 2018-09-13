@@ -327,7 +327,7 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
             return this;
         }
 
-        return of(newX, newY);
+        return of(newX, newY, newZ);
     }
 
     /**

@@ -57,7 +57,7 @@ public class CoordinateTest {
 
     @Test
     public void testCoordinateAsArray() throws IOException {
-        testJackson("[ -71.34, 41.12 ]", 41.12d, -71.34d);
+        testJackson("[ -71.34, 41.12 ]", -71.34d, 41.12d);
     }
 
     @Test
