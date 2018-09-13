@@ -176,7 +176,7 @@ Add the following to your `pom.xml`:
 <dependency>
     <groupId>com.arakelian</groupId>
     <artifactId>jackson-utils</artifactId>
-    <version>1.9.7</version>
+    <version>1.9.8</version>
     <scope>compile</scope>
 </dependency>
 ```
@@ -191,7 +191,7 @@ repositories {
 }
 
 dependencies {
-  compile 'com.arakelian:jackson-utils:1.9.7'
+  compile 'com.arakelian:jackson-utils:1.9.8'
 }
 ```
 
