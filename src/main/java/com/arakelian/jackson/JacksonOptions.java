@@ -82,6 +82,12 @@ public final class JacksonOptions {
         this.defaultMapperCacheBuster = defaultMapperCacheBuster;
     }
 
+    private void assertNotSealed() {
+        if (sealed) {
+            throw new IllegalStateException("Cannot change JsonOptions once sealed");
+        }
+    }
+
     public JacksonProcessors build() {
         sealed = true;
         return MAPPER_CACHE.getUnchecked(this);
@@ -166,6 +172,26 @@ public final class JacksonOptions {
         return true;
     }
 
+    final Set<MapperFeature> getDisabled() {
+        return disabled != null ? disabled : Collections.<MapperFeature> emptySet();
+    }
+
+    final Set<MapperFeature> getEnabled() {
+        return enabled != null ? enabled : Collections.<MapperFeature> emptySet();
+    }
+
+    final Locale getLocale() {
+        return locale != null ? locale : Locale.getDefault();
+    }
+
+    final Set<Module> getModules() {
+        return modules != null ? modules : Collections.<Module> emptySet();
+    }
+
+    final Class<?> getView() {
+        return view;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -222,32 +248,6 @@ public final class JacksonOptions {
         this.view = view;
         disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
         return this;
-    }
-
-    private void assertNotSealed() {
-        if (sealed) {
-            throw new IllegalStateException("Cannot change JsonOptions once sealed");
-        }
-    }
-
-    final Set<MapperFeature> getDisabled() {
-        return disabled != null ? disabled : Collections.<MapperFeature> emptySet();
-    }
-
-    final Set<MapperFeature> getEnabled() {
-        return enabled != null ? enabled : Collections.<MapperFeature> emptySet();
-    }
-
-    final Locale getLocale() {
-        return locale != null ? locale : Locale.getDefault();
-    }
-
-    final Set<Module> getModules() {
-        return modules != null ? modules : Collections.<Module> emptySet();
-    }
-
-    final Class<?> getView() {
-        return view;
     }
 
 }

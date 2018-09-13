@@ -31,6 +31,12 @@ public class JsonPointerNotMatchedFilter extends JsonPointerBasedFilter {
     }
 
     @Override
+    protected boolean _includeScalar() {
+        // should only occur for root-level scalars, path "/"
+        return !_pathToMatch.matches();
+    }
+
+    @Override
     public TokenFilter includeElement(final int index) {
         final JsonPointer next = _pathToMatch.matchElement(index);
         if (next == null) {
@@ -57,11 +63,5 @@ public class JsonPointerNotMatchedFilter extends JsonPointerBasedFilter {
     @Override
     public String toString() {
         return "[NotJsonPointerFilter at: " + _pathToMatch + "]";
-    }
-
-    @Override
-    protected boolean _includeScalar() {
-        // should only occur for root-level scalars, path "/"
-        return !_pathToMatch.matches();
     }
 }
