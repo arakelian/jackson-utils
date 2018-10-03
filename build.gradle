@@ -29,13 +29,13 @@ plugins {
     id "com.github.johnrengelman.shadow" version "2.0.4"
 
     // useful utilities
-    id "com.arakelian.multitool" version "1.4.2"
+    id "com.arakelian.multitool" version "1.5.2"
 }
 
 group   = 'com.arakelian'
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.10'
+    gradleVersion = '4.10.2'
 }
 
 multitool {
@@ -59,14 +59,14 @@ dependencies {
     // the gradle plugin uses latest.release which breaks reproducibility
     errorprone 'com.google.errorprone:error_prone_core:2.3.1'
 
-    compile 'com.arakelian:more-commons:1.9.3'
+    compile 'com.arakelian:more-commons:1.9.5'
 
     // shadow Guava due to frequent downstream incompatibility issues
     shadow  'com.google.guava:guava:26.0-jre'
 
     // shadow because we use very few classes from here and don't want to create
     // unnecessary downstream dependencies
-    shadow  'org.apache.commons:commons-lang3:3.8'
+    shadow  'org.apache.commons:commons-lang3:3.8.1'
 
     // using Jackson feature set which requires Java 8+
     compile 'com.fasterxml.jackson.core:jackson-core:2.8.11'
@@ -85,5 +85,5 @@ dependencies {
     // for unit testing
     testCompile 'junit:junit:4.12'
     testCompile 'net.javacrumbs.json-unit:json-unit:1.31.1'
-    testCompile 'com.arakelian:more-commons:1.9.3:tests'
+    testCompile 'com.arakelian:more-commons:1.9.5:tests'
 }
