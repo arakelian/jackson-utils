@@ -227,8 +227,8 @@ public class JacksonUtilsTest {
     public void testToJson() {
         JsonAssert.assertJsonEquals(
                 "{\"one\":1,\"two\":2,\"three\":3.0}",
-                JacksonUtils.toJson("one", 1, "two", 2, "three", Double.valueOf(3)));
-        JsonAssert.assertJsonEquals("{}", JacksonUtils.toJson());
+                JacksonUtils.toJson("one", 1, "two", 2, "three", Double.valueOf(3)).toString());
+        JsonAssert.assertJsonEquals("{}", JacksonUtils.toJson().toString());
     }
 
     private void verifyDateSerialization(final String dateString, final ZonedDateTime expected)

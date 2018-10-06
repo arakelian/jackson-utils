@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.io.input.CharSequenceReader;
 import org.apache.commons.lang3.StringUtils;
 
 import com.arakelian.jackson.JacksonOptions;
@@ -183,11 +184,11 @@ public class JacksonUtils {
         return readValue(getObjectMapper(), json, type);
     }
 
-    public static String toJson(final Object... keyValues) {
+    public static CharSequence toJson(final Object... keyValues) {
         return toJson(getObjectMapper(), keyValues);
     }
 
-    public static String toJson(final ObjectMapper mapper, final Object... keyValues) {
+    public static CharSequence toJson(final ObjectMapper mapper, final Object... keyValues) {
         Preconditions.checkArgument(mapper != null, "mapper must be non-null");
 
         final int length = keyValues.length;
@@ -216,9 +217,9 @@ public class JacksonUtils {
     }
 
     public static JsonNode toJsonNode(final ObjectMapper mapper, final Object... keyValues) {
-        final String json = toJson(mapper, keyValues);
+        final CharSequence json = toJson(mapper, keyValues);
         try {
-            return mapper.readValue(json, JsonNode.class);
+            return mapper.readValue(new CharSequenceReader(json), JsonNode.class);
         } catch (final IOException e) {
             // should not happen since we serialized JSON ourselves
             throw new UncheckedIOException(e);
@@ -238,16 +239,18 @@ public class JacksonUtils {
         return builder().locale(locale).build().mapper().convertValue(value, LinkedHashMap.class);
     }
 
-    public static String toString(final JsonGeneratorCallback callback) throws UncheckedIOException {
+    public static CharSequence toString(final JsonGeneratorCallback callback) throws UncheckedIOException {
         return toString(callback, getObjectMapper(), true);
     }
 
-    public static String toString(
+    public static CharSequence toString(
             final JsonGeneratorCallback callback,
             final ObjectMapper mapper,
             final boolean pretty) throws UncheckedIOException {
 
-        final StringWriter out = new StringWriter();
+        // default size would be 16 bytes; let's choose something more reasonable for a JSON data
+        // structure
+        final StringWriter out = new StringWriter(512);
 
         if (pretty) {
             try (final JsonGenerator gen = mapper.getFactory() //
@@ -267,8 +270,8 @@ public class JacksonUtils {
             }
         }
 
-        final String result = out.getBuffer().toString();
-        return result;
+        // let's give caller a chance to avoid a toString
+        return out.getBuffer();
     }
 
     public static String toString(final Object value, final boolean pretty) throws JsonProcessingException {

@@ -29,7 +29,7 @@ plugins {
     id "com.github.johnrengelman.shadow" version "2.0.4"
 
     // useful utilities
-    id "com.arakelian.multitool" version "1.5.2"
+    id "com.arakelian.multitool" version "1.5.3"
 }
 
 group   = 'com.arakelian'
@@ -67,7 +67,8 @@ dependencies {
     // shadow because we use very few classes from here and don't want to create
     // unnecessary downstream dependencies
     shadow  'org.apache.commons:commons-lang3:3.8.1'
-
+    shadow  'commons-io:commons-io:2.6'
+    
     // using Jackson feature set which requires Java 8+
     compile 'com.fasterxml.jackson.core:jackson-core:2.8.11'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.8.11'
