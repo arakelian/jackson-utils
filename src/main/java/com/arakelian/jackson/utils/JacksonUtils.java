@@ -184,6 +184,42 @@ public class JacksonUtils {
         return readValue(getObjectMapper(), json, type);
     }
 
+    public static CharSequence toCharSequence(final JsonGeneratorCallback callback)
+            throws UncheckedIOException {
+        return toCharSequence(callback, getObjectMapper(), true);
+    }
+
+    public static CharSequence toCharSequence(
+            final JsonGeneratorCallback callback,
+            final ObjectMapper mapper,
+            final boolean pretty) throws UncheckedIOException {
+
+        // default size would be 16 bytes; let's choose something more reasonable for a JSON data
+        // structure
+        final StringWriter out = new StringWriter(128);
+
+        if (pretty) {
+            try (final JsonGenerator gen = mapper.getFactory() //
+                    .createGenerator(out) //
+                    .useDefaultPrettyPrinter()) {
+                callback.accept(gen);
+            } catch (final IOException e) {
+                // shouldn't happen when writing to a String
+                throw new UncheckedIOException(e);
+            }
+        } else {
+            try (final JsonGenerator writer = mapper.getFactory().createGenerator(out)) {
+                callback.accept(writer);
+            } catch (final IOException e) {
+                // shouldn't happen when writing to a String
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        // let's give caller a chance to avoid a toString
+        return out.getBuffer();
+    }
+
     public static CharSequence toJson(final Object... keyValues) {
         return toJson(getObjectMapper(), keyValues);
     }
@@ -196,7 +232,7 @@ public class JacksonUtils {
                 length % 2 == 0,
                 "Expected key-value pairs, but received array with odd number of entries");
 
-        return toString(gen -> {
+        return toCharSequence(gen -> {
             gen.writeStartObject();
             for (int i = 0; i < length;) {
                 final String key = Objects.toString(keyValues[i++], null);
@@ -239,39 +275,17 @@ public class JacksonUtils {
         return builder().locale(locale).build().mapper().convertValue(value, LinkedHashMap.class);
     }
 
-    public static CharSequence toString(final JsonGeneratorCallback callback) throws UncheckedIOException {
-        return toString(callback, getObjectMapper(), true);
+    public static String toString(final JsonGeneratorCallback callback) throws UncheckedIOException {
+        final CharSequence csq = toCharSequence(callback);
+        return csq != null ? csq.toString() : null;
     }
 
-    public static CharSequence toString(
+    public static String toString(
             final JsonGeneratorCallback callback,
             final ObjectMapper mapper,
             final boolean pretty) throws UncheckedIOException {
-
-        // default size would be 16 bytes; let's choose something more reasonable for a JSON data
-        // structure
-        final StringWriter out = new StringWriter(512);
-
-        if (pretty) {
-            try (final JsonGenerator gen = mapper.getFactory() //
-                    .createGenerator(out) //
-                    .useDefaultPrettyPrinter()) {
-                callback.accept(gen);
-            } catch (final IOException e) {
-                // shouldn't happen when writing to a String
-                throw new UncheckedIOException(e);
-            }
-        } else {
-            try (final JsonGenerator writer = mapper.getFactory().createGenerator(out)) {
-                callback.accept(writer);
-            } catch (final IOException e) {
-                // shouldn't happen when writing to a String
-                throw new UncheckedIOException(e);
-            }
-        }
-
-        // let's give caller a chance to avoid a toString
-        return out.getBuffer();
+        final CharSequence csq = toCharSequence(callback, mapper, pretty);
+        return csq != null ? csq.toString() : null;
     }
 
     public static String toString(final Object value, final boolean pretty) throws JsonProcessingException {
