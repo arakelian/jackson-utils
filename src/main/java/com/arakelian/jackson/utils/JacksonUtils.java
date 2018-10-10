@@ -292,6 +292,14 @@ public class JacksonUtils {
         return value == null ? StringUtils.EMPTY : builder().pretty(pretty).build().toString(value);
     }
 
+    public static String toStringSafe(final Object value, final boolean pretty) throws UncheckedIOException {
+        try {
+            return toString(value, pretty);
+        } catch (final JsonProcessingException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     public static ObjectMapper withView(final ObjectMapper mapper, final Class<?> view) {
         mapper.enable(MapperFeature.DEFAULT_VIEW_INCLUSION);
         mapper.setConfig(mapper.getSerializationConfig().withView(view));
