@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
@@ -32,6 +33,9 @@ import org.junit.Test;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 import net.javacrumbs.jsonunit.JsonAssert;
 
@@ -229,6 +233,83 @@ public class JacksonUtilsTest {
                 "{\"one\":1,\"two\":2,\"three\":3.0}",
                 JacksonUtils.toJson("one", 1, "two", 2, "three", Double.valueOf(3)).toString());
         JsonAssert.assertJsonEquals("{}", JacksonUtils.toJson().toString());
+    }
+
+    @Test
+    public void testTraverse() throws IOException {
+        final JsonNode root = JacksonUtils.readValue("{\n" + //
+                "    \"id\": 4,\n" + //
+                "    \"name\": \"Patricia Lebsack\",\n" + //
+                "    \"username\": \"Karianne\",\n" + //
+                "    \"email\": \"Julianne.OConner@kory.org\",\n" + //
+                "    \"address\": {\n" + //
+                "      \"street\": \"Hoeger Mall\",\n" + //
+                "      \"suite\": \"Apt. 692\",\n" + //
+                "      \"city\": \"South Elvis\",\n" + //
+                "      \"zipcode\": \"53919-4257\",\n" + //
+                "      \"geo\": {\n" + //
+                "        \"lat\": \"29.4572\",\n" + //
+                "        \"lng\": \"-164.2990\"\n" + //
+                "      }\n" + //
+                "    },\n" + //
+                "    \"phones\": [\"703-555-1212\", \"493-170-9623 x156\"],\n" + //
+                "    \"website\": \"kale.biz\",\n" + //
+                "    \"company\": {\n" + //
+                "      \"name\": \"Robel-Corkery\",\n" + //
+                "      \"catchPhrase\": \"Multi-tiered zero tolerance productivity\",\n" + //
+                "      \"bs\": \"transition cutting-edge web services\"\n" + //
+                "    }\n" + //
+                "  }", JsonNode.class);
+
+        final List<String> values = Lists.newArrayList();
+        JacksonUtils.traverse(root, null, node -> {
+            // collect values as we traverse
+            values.add(node.asText());
+        });
+
+        // these are the values that should have been collected
+        assertEquals(
+                ImmutableList.of(
+                        "4",
+                        "Patricia Lebsack",
+                        "Karianne",
+                        "Julianne.OConner@kory.org",
+                        "Hoeger Mall",
+                        "Apt. 692",
+                        "South Elvis",
+                        "53919-4257",
+                        "29.4572",
+                        "-164.2990",
+                        "703-555-1212",
+                        "493-170-9623 x156",
+                        "kale.biz",
+                        "Robel-Corkery",
+                        "Multi-tiered zero tolerance productivity",
+                        "transition cutting-edge web services"),
+                values);
+
+        // now let's filter address
+        values.clear();
+        JacksonUtils.traverse(root, name -> !StringUtils.equals(name, "address"), node -> {
+            // collect values as we traverse
+            values.add(node.asText());
+        });
+
+        // these are the values that should have been collected, when adddress values have been
+        // filtered out
+        assertEquals(
+                ImmutableList.of(
+                        "4",
+                        "Patricia Lebsack",
+                        "Karianne",
+                        "Julianne.OConner@kory.org",
+                        "703-555-1212",
+                        "493-170-9623 x156",
+                        "kale.biz",
+                        "Robel-Corkery",
+                        "Multi-tiered zero tolerance productivity",
+                        "transition cutting-edge web services"),
+                values);
     }
 
     private void verifyDateSerialization(final String dateString, final ZonedDateTime expected)

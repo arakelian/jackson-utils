@@ -22,12 +22,15 @@ import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.apache.commons.io.input.CharSequenceReader;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +54,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.google.common.base.Preconditions;
 
@@ -184,6 +188,23 @@ public class JacksonUtils {
         return readValue(getObjectMapper(), json, type);
     }
 
+    public static <K, V> Map<K, V> readValueAsMap(
+            final ObjectMapper mapper,
+            final String json,
+            final Class<K> keyType,
+            final Class<V> valueType) throws IOException {
+        Preconditions.checkArgument(mapper != null, "mapper must be non-null");
+        Preconditions.checkArgument(keyType != null, "keyType must be non-null");
+        Preconditions.checkArgument(valueType != null, "valueType must be non-null");
+
+        if (StringUtils.isEmpty(json)) {
+            return Collections.<K, V> emptyMap();
+        }
+        final MapType type = mapper.getTypeFactory()
+                .constructMapType(LinkedHashMap.class, keyType, valueType);
+        return mapper.readValue(json, type);
+    }
+
     public static CharSequence toCharSequence(final JsonGeneratorCallback callback)
             throws UncheckedIOException {
         return toCharSequence(callback, getObjectMapper(), true);
@@ -300,6 +321,39 @@ public class JacksonUtils {
         }
     }
 
+    public static void traverse(
+            final JsonNode node,
+            final Predicate<String> fieldPredicate,
+            final Consumer<JsonNode> consumer) {
+        if (node == null || node.isNull() || node.isMissingNode()) {
+            return;
+        }
+
+        if (node.isArray()) {
+            for (int i = 0, size = node.size(); i < size; i++) {
+                final JsonNode item = node.get(i);
+                traverse(item, null, consumer);
+            }
+            return;
+        }
+
+        if (node.isObject()) {
+            final ObjectNode obj = (ObjectNode) node;
+            for (final Iterator<String> it = obj.fieldNames(); it.hasNext();) {
+                final String name = it.next();
+                if (fieldPredicate == null || fieldPredicate.test(name)) {
+                    final JsonNode child = obj.get(name);
+                    traverse(child, null, consumer);
+                }
+            }
+            return;
+        }
+
+        if (!node.isPojo()) {
+            consumer.accept(node);
+        }
+    }
+
     public static ObjectMapper withView(final ObjectMapper mapper, final Class<?> view) {
         mapper.enable(MapperFeature.DEFAULT_VIEW_INCLUSION);
         mapper.setConfig(mapper.getSerializationConfig().withView(view));
@@ -309,22 +363,5 @@ public class JacksonUtils {
 
     private JacksonUtils() {
         // utility class
-    }
-
-    public <K, V> Map<K, V> readValueAsMap(
-            final ObjectMapper mapper,
-            final String json,
-            final Class<K> keyType,
-            final Class<V> valueType) throws IOException {
-        Preconditions.checkArgument(mapper != null, "mapper must be non-null");
-        Preconditions.checkArgument(keyType != null, "keyType must be non-null");
-        Preconditions.checkArgument(valueType != null, "valueType must be non-null");
-
-        if (StringUtils.isEmpty(json)) {
-            return Collections.<K, V> emptyMap();
-        }
-        final MapType type = mapper.getTypeFactory()
-                .constructMapType(LinkedHashMap.class, keyType, valueType);
-        return mapper.readValue(json, type);
     }
 }
