@@ -34,10 +34,6 @@ plugins {
 
 group   = 'com.arakelian'
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.10.2'
-}
-
 multitool {
     relocates += [
         'org.apache.commons'     : 'repackaged.com.arakelian.jackson.${prefix}org.apache.commons',
