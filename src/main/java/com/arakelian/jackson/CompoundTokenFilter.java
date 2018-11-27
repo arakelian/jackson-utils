@@ -89,7 +89,7 @@ public class CompoundTokenFilter extends TokenFilter {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof CompoundTokenFilter)) {
             return false;
         }
         final CompoundTokenFilter other = (CompoundTokenFilter) obj;
