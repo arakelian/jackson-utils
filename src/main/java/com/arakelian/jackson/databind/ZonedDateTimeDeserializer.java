@@ -40,6 +40,6 @@ public class ZonedDateTimeDeserializer extends StdDeserializer<ZonedDateTime> {
             final String str = p.getText().trim();
             return DateUtils.toZonedDateTimeUtc(str);
         }
-        throw ctxt.wrongTokenException(p, JsonToken.VALUE_STRING, "Expected a string");
+        throw ctxt.wrongTokenException(p, ZonedDateTime.class, JsonToken.VALUE_STRING, "Expected a string");
     }
 }

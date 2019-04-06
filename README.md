@@ -2,6 +2,11 @@
 
 Utilities for reading and writing JSON and XML using Jackson.
 
+## Requirements
+
+* Version 1.x is compatible with Java 8+
+* Version 2.x is compatible with Java 11+
+
 ## Serialization and Deserialization
 
 ### Enumerated Types
@@ -176,7 +181,7 @@ Add the following to your `pom.xml`:
 <dependency>
     <groupId>com.arakelian</groupId>
     <artifactId>jackson-utils</artifactId>
-    <version>1.11.0</version>
+    <version>2.0.0</version>
     <scope>compile</scope>
 </dependency>
 ```
@@ -191,7 +196,7 @@ repositories {
 }
 
 dependencies {
-  compile 'com.arakelian:jackson-utils:1.11.0'
+  compile 'com.arakelian:jackson-utils:2.0.0'
 }
 ```
 

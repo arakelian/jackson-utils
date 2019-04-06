@@ -54,7 +54,7 @@ public abstract class GeoPoint implements Serializable {
                 final JsonNode lon = obj.get("lon");
                 if (lat == null || lon == null) {
                     // always throws exception
-                    ctxt.reportMappingException("Expecting object with 'lat' and 'lon' fields");
+                    ctxt.reportInputMismatch(this, "Expecting object with 'lat' and 'lon' fields");
                     return null;
                 }
                 return ImmutableGeoPoint.builder() //
@@ -67,7 +67,8 @@ public abstract class GeoPoint implements Serializable {
                 final ArrayNode arr = (ArrayNode) node;
                 if (arr.size() != 2) {
                     // always throws exception
-                    ctxt.reportMappingException(
+                    ctxt.reportInputMismatch(
+                            this,
                             "Expecting array with 2 elements but found %s elements",
                             arr.size());
                     return null;
@@ -85,7 +86,7 @@ public abstract class GeoPoint implements Serializable {
             }
 
             // always throws exception
-            ctxt.reportMappingException("Expecting array, object or text node");
+            ctxt.reportInputMismatch(this, "Expecting array, object or text node");
             return null;
         }
     }

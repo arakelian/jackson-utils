@@ -69,7 +69,8 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
                 }
 
                 // always throws exception
-                ctxt.reportMappingException(
+                ctxt.reportInputMismatch(
+                        this,
                         "Expecting array with 2 or 3 elements but found %s elements",
                         size);
                 return null;
@@ -83,7 +84,7 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
             }
 
             // always throws exception
-            ctxt.reportMappingException("Expecting array, object or text node");
+            ctxt.reportInputMismatch(this, "Expecting array, object or text node");
             return null;
         }
     }

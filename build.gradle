@@ -14,25 +14,29 @@ plugins {
     id 'idea'
 
     // keep dependencies up-to-date!
-    id 'com.github.ben-manes.versions' version '0.20.0'
+    id 'com.github.ben-manes.versions' version '0.21.0'
 
     // useful for creating immutable java beans
-    id 'org.inferred.processors' version '1.2.18'
+    id 'org.inferred.processors' version '2.2.0'
 
     // to ensure clean code
-    id "net.ltgt.errorprone" version "0.0.16"
+    id "net.ltgt.errorprone" version "0.7.1"
 
     // for deployment to Maven Central
-    id "io.codearte.nexus-staging" version "0.12.0"
+    id "io.codearte.nexus-staging" version "0.20.0"
 
     // for building fat jar
-    id "com.github.johnrengelman.shadow" version "2.0.4"
+    id "com.github.johnrengelman.shadow" version "5.0.0"
 
     // useful utilities
-    id "com.arakelian.multitool" version "1.5.7"
+    id "com.arakelian.multitool" version "2.1.0"
 }
 
 group   = 'com.arakelian'
+
+wrapper {
+    gradleVersion = '5.3'
+}
 
 multitool {
     relocates += [
@@ -50,15 +54,19 @@ multitool {
 }
 
 dependencies {
-    processor 'org.immutables:value:2.7.3'
-    
-    // the gradle plugin uses latest.release which breaks reproducibility
-    errorprone 'com.google.errorprone:error_prone_core:2.3.2'
+    processor 'org.immutables:value:2.7.5'
 
-    compile 'com.arakelian:more-commons:1.10.0'
+    // annotations
+    compile 'org.immutables:value-annotations:2.7.5'
+    
+    // configure errorprone version
+    errorprone 'com.google.errorprone:error_prone_core:2.3.3'
+
+    // use Java 11 compatible versions
+    compile 'com.arakelian:more-commons:2.0.0'
 
     // shadow Guava due to frequent downstream incompatibility issues
-    shadow  'com.google.guava:guava:27.0.1-jre'
+    shadow  'com.google.guava:guava:27.1-jre'
 
     // shadow because we use very few classes from here and don't want to create
     // unnecessary downstream dependencies
@@ -66,10 +74,10 @@ dependencies {
     shadow  'commons-io:commons-io:2.6'
     
     // using Jackson feature set which requires Java 8+
-    compile 'com.fasterxml.jackson.core:jackson-core:2.8.11'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.11'
-    compile 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.8.11'
-    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.8.11'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.9.8'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+    compile 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.9.8'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.9.8'
 
     // logging
     testCompile 'org.apache.logging.log4j:log4j-api:2.9.1'
@@ -82,5 +90,5 @@ dependencies {
     // for unit testing
     testCompile 'junit:junit:4.12'
     testCompile 'net.javacrumbs.json-unit:json-unit:1.31.1'
-    testCompile 'com.arakelian:more-commons:1.10.0:tests'
+    testCompile 'com.arakelian:more-commons:2.0.0:tests'
 }
