@@ -210,21 +210,23 @@ public class JacksonUtilsTest {
         bean.setPassword("mysecret");
 
         // should not see anything
-        assertEquals("{}", JacksonUtils.builder().view(Views.Empty.class).build().toString(bean));
+        assertEquals("{}", JacksonUtils.toString(bean, JacksonUtils.getObjectWriter(Views.Empty.class)));
 
         // public fields - with and without pretty formatting
         assertEquals(
                 "{\"id\":\"100\",\"name\":\"Greg Arakelian\"}",
-                JacksonUtils.builder().view(Views.Public.class).build().toString(bean));
+                JacksonUtils.toString(bean, JacksonUtils.getObjectWriter(Views.Public.class)));
         assertEquals(
                 "{\n  \"id\" : \"100\",\n  \"name\" : \"Greg Arakelian\"\n}"
                         .replace("\n", System.getProperty("line.separator")),
-                JacksonUtils.builder().view(Views.Public.class).pretty(true).build().toString(bean));
+                JacksonUtils.toString(bean, JacksonUtils.getObjectWriter(Views.Public.class, true)));
 
         // everything (when no view used, or when private which extends public)
         final String expected = "{\"id\":\"100\",\"name\":\"Greg Arakelian\",\"username\":\"garakelian\",\"password\":\"mysecret\"}";
-        assertEquals(expected, JacksonUtils.builder().build().toString(bean));
-        assertEquals(expected, JacksonUtils.builder().view(Views.Private.class).build().toString(bean));
+        assertEquals(expected, JacksonUtils.toString(bean, JacksonUtils.getObjectWriter(false)));
+        assertEquals(
+                expected,
+                JacksonUtils.toString(bean, JacksonUtils.getObjectWriter(Views.Private.class)));
     }
 
     @Test
@@ -262,10 +264,13 @@ public class JacksonUtilsTest {
                 "  }", JsonNode.class);
 
         final List<String> values = Lists.newArrayList();
-        JacksonUtils.traverse(root, null, node -> {
-            // collect values as we traverse
-            values.add(node.asText());
-        });
+        JacksonUtils.traverse(
+                root,
+                null,
+                node -> {
+                    // collect values as we traverse
+                    values.add(node.asText());
+                });
 
         // these are the values that should have been collected
         assertEquals(
@@ -290,10 +295,13 @@ public class JacksonUtilsTest {
 
         // now let's filter address
         values.clear();
-        JacksonUtils.traverse(root, name -> !StringUtils.equals(name, "address"), node -> {
-            // collect values as we traverse
-            values.add(node.asText());
-        });
+        JacksonUtils.traverse(
+                root,
+                name -> !StringUtils.equals(name, "address"),
+                node -> {
+                    // collect values as we traverse
+                    values.add(node.asText());
+                });
 
         // these are the values that should have been collected, when adddress values have been
         // filtered out

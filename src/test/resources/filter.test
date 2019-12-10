@@ -1,0 +1,256 @@
+#
+# Remove object properties
+#
+
+empty
+.c
+
+{
+  "a" : 1,
+  "b" : [ 1, 2, 3, 4 ],
+  "c" : "hello"
+}
+
+{
+  "a" : 1,
+  "b" : [ 1, 2, 3, 4 ]
+}
+
+
+empty
+.b
+
+{
+  "a" : 1,
+  "b" : [ 1, 2, 3, 4 ],
+  "c" : "hello"
+}
+
+{
+  "a" : 1,
+  "c" : "hello"
+}
+
+
+#
+# Nested elements
+#
+
+.[].friends[].id
+empty
+
+[ {
+  "index" : 0,
+  "friends" : [ {
+    "id" : 0,
+    "name" : "Maryann Bryan"
+  }, {
+    "name" : "Allyson Vega"
+  }, {
+    "name" : "Coleen Preston"
+  } ]
+}, {
+  "index" : 1,
+  "friends" : [ {
+    "id" : 0,
+    "name" : "Kristina Pruitt"
+  }, {
+    "name" : "Yolanda Ellis"
+  }, {
+    "name" : "Alyssa Meyers"
+  } ]
+}, {
+  "index" : 2,
+  "friends" : [ {
+    "id" : 0,
+    "name" : "Suarez Macdonald"
+  }, {
+    "name" : "Sybil Miller"
+  }, {
+    "name" : "Reba Luna"
+  } ]
+} ]
+
+[ {
+  "friends" : [ {
+    "id" : 0
+  }, { }, { } ]
+}, {
+  "friends" : [ {
+    "id" : 0
+  }, { }, { } ]
+}, {
+  "friends" : [ {
+    "id" : 0
+  }, { }, { } ]
+} ]
+
+
+empty
+.[].friends[].id
+
+[ {
+  "index" : 0,
+  "friends" : [ {
+    "id" : 0,
+    "name" : "Maryann Bryan"
+  }, {
+    "name" : "Allyson Vega"
+  }, {
+    "name" : "Coleen Preston"
+  } ]
+}, {
+  "index" : 1,
+  "friends" : [ {
+    "id" : 0,
+    "name" : "Kristina Pruitt"
+  }, {
+    "name" : "Yolanda Ellis"
+  }, {
+    "name" : "Alyssa Meyers"
+  } ]
+}, {
+  "index" : 2,
+  "friends" : [ {
+    "id" : 0,
+    "name" : "Suarez Macdonald"
+  }, {
+    "name" : "Sybil Miller"
+  }, {
+    "name" : "Reba Luna"
+  } ]
+} ]
+
+[ {
+  "index" : 0,
+  "friends" : [ {
+    "name" : "Maryann Bryan"
+  }, {
+    "name" : "Allyson Vega"
+  }, {
+    "name" : "Coleen Preston"
+  } ]
+}, {
+  "index" : 1,
+  "friends" : [ {
+    "name" : "Kristina Pruitt"
+  }, {
+    "name" : "Yolanda Ellis"
+  }, {
+    "name" : "Alyssa Meyers"
+  } ]
+}, {
+  "index" : 2,
+  "friends" : [ {
+    "name" : "Suarez Macdonald"
+  }, {
+    "name" : "Sybil Miller"
+  }, {
+    "name" : "Reba Luna"
+  } ]
+} ]
+
+
+empty
+.[].friends[].name
+
+[ {
+  "index" : 0,
+  "friends" : [ {
+    "id" : 0,
+    "name" : "Maryann Bryan"
+  }, {
+    "name" : "Allyson Vega"
+  }, {
+    "name" : "Coleen Preston"
+  } ]
+}, {
+  "index" : 1,
+  "friends" : [ {
+    "id" : 0,
+    "name" : "Kristina Pruitt"
+  }, {
+    "name" : "Yolanda Ellis"
+  }, {
+    "name" : "Alyssa Meyers"
+  } ]
+}, {
+  "index" : 2,
+  "friends" : [ {
+    "id" : 0,
+    "name" : "Suarez Macdonald"
+  }, {
+    "name" : "Sybil Miller"
+  }, {
+    "name" : "Reba Luna"
+  } ]
+} ]
+
+[ {
+  "index" : 0,
+  "friends" : [ {
+    "id" : 0
+  }, { }, { } ]
+}, {
+  "index" : 1,
+  "friends" : [ {
+    "id" : 0
+  }, { }, { } ]
+}, {
+  "index" : 2,
+  "friends" : [ {
+    "id" : 0
+  }, { }, { } ]
+} ]
+
+
+#
+# Remove array
+#
+
+empty
+.ids
+
+{
+  "ids": [1,2,3,4],
+  "emails": ["a@gmail.com", "b@gmail.com", "c@gmail.com"],
+  "name": "Greg Arakelian"
+}
+
+{
+  "emails" : [ "a@gmail.com", "b@gmail.com", "c@gmail.com" ],
+  "name" : "Greg Arakelian"
+}
+
+
+#
+# Only include array
+#
+
+.ids
+empty
+
+{
+  "ids": [1,2,3,4],
+  "emails": ["a@gmail.com", "b@gmail.com", "c@gmail.com"],
+  "name": "Greg Arakelian"
+}
+
+{
+  "ids" : [ 1, 2, 3, 4 ]
+}
+
+
+.ids,.emails
+empty
+
+{
+  "ids": [1,2,3,4],
+  "emails": ["a@gmail.com", "b@gmail.com", "c@gmail.com"],
+  "name": "Greg Arakelian"
+}
+
+{
+  "ids" : [ 1, 2, 3, 4 ],
+  "emails" : [ "a@gmail.com", "b@gmail.com", "c@gmail.com" ]
+}

@@ -17,237 +17,210 @@
 
 package com.arakelian.jackson;
 
-import java.util.Collections;
+import java.time.ZonedDateTime;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
+import org.immutables.value.Value;
+
+import com.arakelian.core.feature.Nullable;
+import com.arakelian.jackson.databind.EnumUppercaseDeserializerModifier;
+import com.arakelian.jackson.databind.TrimWhitespaceDeserializer;
+import com.arakelian.jackson.databind.ZonedDateTimeDeserializer;
+import com.arakelian.jackson.databind.ZonedDateTimeSerializer;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonGenerator.Feature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Sets;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
-public final class JacksonOptions {
-    private static LoadingCache<JacksonOptions, JacksonProcessors> MAPPER_CACHE = CacheBuilder.newBuilder()
-            .maximumSize(Integer.MAX_VALUE).build(new CacheLoader<JacksonOptions, JacksonProcessors>() {
-                @Override
-                public JacksonProcessors load(final JacksonOptions opts) {
-                    // same configuration as default mapper, but with different locale
-                    final ObjectMapper mapper = opts.defaultMapper != null ? opts.defaultMapper.copy()
-                            : new ObjectMapper();
-                    mapper.setLocale(opts.getLocale());
+@Value.Immutable
+public abstract class JacksonOptions {
+    public ObjectMapper configure(final ObjectMapper mapper) {
+        // set locale
+        mapper.setLocale(getLocale());
 
-                    // add request-specific modules
-                    for (final Module module : opts.getModules()) {
-                        mapper.registerModule(module);
-                    }
+        // register modules
+        if (isFindAndRegisterModules()) {
+            mapper.findAndRegisterModules();
+        }
 
-                    for (final MapperFeature feature : opts.getEnabled()) {
-                        mapper.enable(feature);
-                    }
-                    for (final MapperFeature feature : opts.getDisabled()) {
-                        mapper.disable(feature);
-                    }
+        for (final Module module : getModules()) {
+            mapper.registerModule(module);
+        }
 
-                    final Class<?> view = opts.getView();
-                    final boolean pretty = opts.isPretty();
-                    final ObjectWriter writer;
-                    if (view != null) {
-                        // view-based rendering
-                        writer = pretty ? mapper.writerWithView(view).withDefaultPrettyPrinter()
-                                : mapper.writerWithView(view);
-                    } else {
-                        writer = pretty ? mapper.writerWithDefaultPrettyPrinter() : mapper.writer();
-                    }
-                    return new JacksonProcessors(mapper, writer);
-                }
-            });
-    private Locale locale;
-    private Set<Module> modules;
-    private Set<MapperFeature> enabled;
-    private Set<MapperFeature> disabled;
-    private Class<?> view;
-    private boolean pretty;
-    private boolean sealed;
-    private final ObjectMapper defaultMapper;
+        mapper.setSerializationInclusion(getSerializationInclusion());
 
-    private final int defaultMapperCacheBuster;
+        final Map<Feature, Boolean> features = getFeatures();
+        for (final Feature feature : features.keySet()) {
+            mapper.configure(feature, features.get(feature).booleanValue());
+        }
 
-    public JacksonOptions(final ObjectMapper defaultMapper, final int defaultMapperCacheBuster) {
-        // when defaultMapper changes this will suffice as cache busting
-        this.defaultMapper = defaultMapper;
-        this.defaultMapperCacheBuster = defaultMapperCacheBuster;
+        final Map<SerializationFeature, Boolean> serializationFeatures = getSerializationFeatures();
+        for (final SerializationFeature feature : serializationFeatures.keySet()) {
+            mapper.configure(feature, serializationFeatures.get(feature).booleanValue());
+        }
+
+        final Map<DeserializationFeature, Boolean> deserializationFeatures = getDeserializationFeatures();
+        for (final DeserializationFeature feature : deserializationFeatures.keySet()) {
+            mapper.configure(feature, deserializationFeatures.get(feature).booleanValue());
+        }
+
+        for (final MapperFeature feature : getEnabled()) {
+            mapper.enable(feature);
+        }
+
+        for (final MapperFeature feature : getDisabled()) {
+            mapper.disable(feature);
+        }
+
+        final Class<?> view = getView();
+        if (view != null) {
+            mapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
+        }
+
+        return mapper;
     }
 
-    private void assertNotSealed() {
-        if (sealed) {
-            throw new IllegalStateException("Cannot change JsonOptions once sealed");
-        }
+    @Nullable
+    public abstract ObjectMapper getDefaultMapper();
+
+    @Value.Default
+    public Map<DeserializationFeature, Boolean> getDeserializationFeatures() {
+        final ImmutableMap.Builder<DeserializationFeature, Boolean> map = ImmutableMap.builder();
+
+        // seems reasonable to allow caller to pass single value for an array
+        map.put(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+
+        // we do want to enforce some strict policies on other "bad" data
+        map.put(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY, true);
+        map.put(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS, true);
+        map.put(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true);
+        return map.build();
     }
 
-    public JacksonProcessors build() {
-        sealed = true;
-        return MAPPER_CACHE.getUnchecked(this);
+    public abstract Set<MapperFeature> getDisabled();
+
+    public abstract Set<MapperFeature> getEnabled();
+
+    @Value.Default
+    public Map<Feature, Boolean> getFeatures() {
+        final ImmutableMap.Builder<Feature, Boolean> map = ImmutableMap.builder();
+
+        // we don't want scientific notation used for big decimals
+        map.put(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+        return map.build();
     }
 
-    public final JacksonOptions disable(final MapperFeature disable) {
-        assertNotSealed();
-        if (disabled == null) {
-            disabled = Sets.newHashSet(disable);
-        } else {
-            disabled.add(disable);
-        }
-        return this;
+    @Value.Default
+    public Locale getLocale() {
+        return Locale.getDefault();
     }
 
-    public final JacksonOptions enable(final MapperFeature enable) {
-        assertNotSealed();
-        if (enabled == null) {
-            enabled = Sets.newHashSet(enable);
-        } else {
-            enabled.add(enable);
-        }
-        return this;
+    @Value.Default
+    public Set<Module> getModules() {
+        // when parsing JSON, we want to automatically trim away and leading and trailing whitespace
+        // (this includes not only spaces, but tabs and newlines as well)
+        final SimpleModule trimWhitespace = new SimpleModule() //
+                .addDeserializer(String.class, TrimWhitespaceDeserializer.SINGLETON);
+
+        // change Jackson Enum deserialization so that it forces to uppercase
+        final SimpleModule forceEnumsUppercase = new SimpleModule()
+                .setDeserializerModifier(new EnumUppercaseDeserializerModifier());
+
+        // handle ZonedDateTime using DateUtils
+        final SimpleModule javaDates = new SimpleModule() //
+                .addSerializer(new ZonedDateTimeSerializer()) //
+                .addDeserializer(ZonedDateTime.class, new ZonedDateTimeDeserializer());
+
+        return ImmutableSet.of(trimWhitespace, forceEnumsUppercase, javaDates);
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final JacksonOptions other = (JacksonOptions) obj;
-        if (disabled == null) {
-            if (other.disabled != null) {
-                return false;
+    @Value.Lazy
+    public ObjectMapper getObjectMapper() {
+        final ObjectMapper defaultMapper = getDefaultMapper();
+        final ObjectMapper mapper = defaultMapper != null ? defaultMapper.copy() : new ObjectMapper();
+        return configure(mapper);
+    }
+
+    @Value.Lazy
+    public ObjectWriter getObjectWriter() {
+        return createObjectWriter(getView(), false);
+    }
+
+    public ObjectWriter getObjectWriter(final Class<?> view, final boolean pretty) {
+        if (view == getView()) {
+            if (pretty) {
+                return getObjectWriterWithPrettyPrinter();
+            } else {
+                return getObjectWriter();
             }
-        } else if (!disabled.equals(other.disabled)) {
-            return false;
         }
-        if (enabled == null) {
-            if (other.enabled != null) {
-                return false;
-            }
-        } else if (!enabled.equals(other.enabled)) {
-            return false;
+        return createObjectWriter(view, pretty);
+    }
+
+    @Value.Lazy
+    public ObjectWriter getObjectWriterWithPrettyPrinter() {
+        return createObjectWriter(getView(), true);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Value.Default
+    public Map<SerializationFeature, Boolean> getSerializationFeatures() {
+        final ImmutableMap.Builder<SerializationFeature, Boolean> map = ImmutableMap.builder();
+        map.put(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false);
+        map.put(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        map.put(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+
+        // caller can optionally request pretty formatting
+        if (isPretty()) {
+            map.put(SerializationFeature.INDENT_OUTPUT, true);
         }
-        if (defaultMapperCacheBuster != other.defaultMapperCacheBuster) {
-            return false;
-        }
-        if (locale == null) {
-            if (other.locale != null) {
-                return false;
-            }
-        } else if (!locale.equals(other.locale)) {
-            return false;
-        }
-        if (modules == null) {
-            if (other.modules != null) {
-                return false;
-            }
-        } else if (!modules.equals(other.modules)) {
-            return false;
-        }
-        if (pretty != other.pretty) {
-            return false;
-        }
-        if (sealed != other.sealed) {
-            return false;
-        }
-        if (view == null) {
-            if (other.view != null) {
-                return false;
-            }
-        } else if (!view.equals(other.view)) {
-            return false;
-        }
+
+        return map.build();
+    }
+
+    @Value.Default
+    public JsonInclude.Include getSerializationInclusion() {
+        return JsonInclude.Include.NON_EMPTY;
+    }
+
+    @Nullable
+    public abstract Class<?> getView();
+
+    @Value.Default
+    public boolean isFindAndRegisterModules() {
         return true;
     }
 
-    final Set<MapperFeature> getDisabled() {
-        return disabled != null ? disabled : Collections.<MapperFeature> emptySet();
+    @Value.Default
+    public boolean isPretty() {
+        return true;
     }
 
-    final Set<MapperFeature> getEnabled() {
-        return enabled != null ? enabled : Collections.<MapperFeature> emptySet();
-    }
+    private ObjectWriter createObjectWriter(final Class<?> view, final boolean pretty) {
+        final ObjectMapper mapper = getObjectMapper();
 
-    final Locale getLocale() {
-        return locale != null ? locale : Locale.getDefault();
-    }
-
-    final Set<Module> getModules() {
-        return modules != null ? modules : Collections.<Module> emptySet();
-    }
-
-    final Class<?> getView() {
-        return view;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (disabled == null ? 0 : disabled.hashCode());
-        result = prime * result + (enabled == null ? 0 : enabled.hashCode());
-        result = prime * result + defaultMapperCacheBuster;
-        result = prime * result + (locale == null ? 0 : locale.hashCode());
-        result = prime * result + (modules == null ? 0 : modules.hashCode());
-        result = prime * result + (pretty ? 1231 : 1237);
-        result = prime * result + (sealed ? 1231 : 1237);
-        result = prime * result + (view == null ? 0 : view.hashCode());
-        return result;
-    }
-
-    public final boolean isPretty() {
-        return pretty;
-    }
-
-    public final JacksonOptions locale(final Locale locale) {
-        assertNotSealed();
-        this.locale = locale;
-        return this;
-    }
-
-    public final JacksonOptions modules(final Module module) {
-        assertNotSealed();
-        if (this.modules == null) {
-            this.modules = Sets.newHashSet(module);
+        if (view != null) {
+            if (pretty) {
+                return mapper.writerWithView(view).withDefaultPrettyPrinter();
+            } else {
+                return mapper.writerWithView(view).withoutFeatures(SerializationFeature.INDENT_OUTPUT);
+            }
         } else {
-            this.modules.add(module);
+            if (pretty) {
+                return mapper.writerWithDefaultPrettyPrinter();
+            } else {
+                return mapper.writer().withoutFeatures(SerializationFeature.INDENT_OUTPUT);
+            }
         }
-        return this;
     }
-
-    public final JacksonOptions modules(final Set<Module> modules) {
-        assertNotSealed();
-        if (this.modules == null) {
-            this.modules = Sets.newHashSet(modules);
-        } else {
-            this.modules.addAll(modules);
-        }
-        return this;
-    }
-
-    public final JacksonOptions pretty(final boolean pretty) {
-        assertNotSealed();
-        this.pretty = pretty;
-        return this;
-    }
-
-    public final JacksonOptions view(final Class<?> view) {
-        assertNotSealed();
-        this.view = view;
-        disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
-        return this;
-    }
-
 }
