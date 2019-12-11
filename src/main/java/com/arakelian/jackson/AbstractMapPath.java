@@ -189,22 +189,6 @@ public abstract class AbstractMapPath implements Serializable {
         return ImmutableMap.of();
     }
 
-    protected String getSegment(final String path, final int start, final Map map) {
-        final int length = path.length();
-
-        for (int i = start; i < length; i++) {
-            final char ch = path.charAt(i);
-            if (ch == '/' || ch == '.') {
-                final String segment = path.substring(start, i);
-                if (map.containsKey(segment)) {
-                    return segment;
-                }
-            }
-        }
-
-        return path.substring(start);
-    }
-
     public String getString(final String path) {
         return get(path, String.class);
     }
@@ -219,5 +203,21 @@ public abstract class AbstractMapPath implements Serializable {
 
     public void setObjectMapper(final ObjectMapper mapper) {
         this.mapper = mapper;
+    }
+
+    protected String getSegment(final String path, final int start, final Map map) {
+        final int length = path.length();
+
+        for (int i = start; i < length; i++) {
+            final char ch = path.charAt(i);
+            if (ch == '/' || ch == '.') {
+                final String segment = path.substring(start, i);
+                if (map.containsKey(segment)) {
+                    return segment;
+                }
+            }
+        }
+
+        return path.substring(start);
     }
 }

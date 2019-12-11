@@ -71,6 +71,11 @@ public class GeoPointTest {
                 "  }", 41.12d, -71.34d);
     }
 
+    @Test
+    public void testGeoPointAsString() throws IOException {
+        testJackson("\"41.12,-71.34\"", 41.12d, -71.34d);
+    }
+
     @Test(expected = JsonMappingException.class)
     public void testInvalidGeoPointJson() throws IOException {
         // should be 'lat' and 'lon' (not 'lng')
@@ -78,11 +83,6 @@ public class GeoPointTest {
                 "    \"lat\": 41.12,\n" + //
                 "    \"lng\": -71.34\n" + //
                 "  }", 41.12d, -71.34d);
-    }
-
-    @Test
-    public void testGeoPointAsString() throws IOException {
-        testJackson("\"41.12,-71.34\"", 41.12d, -71.34d);
     }
 
     @Test

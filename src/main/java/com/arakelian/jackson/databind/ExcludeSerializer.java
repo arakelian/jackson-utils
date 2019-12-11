@@ -18,31 +18,32 @@
 package com.arakelian.jackson.databind;
 
 import java.io.IOException;
+import java.util.Set;
 
+import com.arakelian.jackson.FilteringJsonGenerator;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.filter.FilteringGeneratorDelegate;
-import com.fasterxml.jackson.core.filter.TokenFilter;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 
 public class ExcludeSerializer<T> extends JsonSerializer<T> {
     private final Class<T> handledType;
-    private final TokenFilter excludeFilter;
+    private final Set<String> excludes;
     private final JsonSerializer<Object> delegate;
 
-    public ExcludeSerializer(final Class<T> handledType, final TokenFilter excludeFilter) {
-        this(handledType, excludeFilter, null);
+    public ExcludeSerializer(final Class<T> handledType, final String... excludes) {
+        this(handledType, null, excludes);
     }
 
     public ExcludeSerializer(
             final Class<T> handledType,
-            final TokenFilter excludeFilter,
-            final JsonSerializer<Object> delegate) {
+            final JsonSerializer<Object> delegate,
+            final String... excludes) {
         this.handledType = Preconditions.checkNotNull(handledType);
-        this.excludeFilter = Preconditions.checkNotNull(excludeFilter);
         this.delegate = delegate;
+        this.excludes = ImmutableSet.copyOf(excludes);
     }
 
     @Override
@@ -53,8 +54,7 @@ public class ExcludeSerializer<T> extends JsonSerializer<T> {
     @Override
     public void serialize(final T value, final JsonGenerator gen, final SerializerProvider serializers)
             throws IOException, JsonProcessingException {
-        final FilteringGeneratorDelegate filtering = new FilteringGeneratorDelegate(gen, excludeFilter, true,
-                true);
+        final FilteringJsonGenerator filtering = new FilteringJsonGenerator(gen, null, excludes);
         if (value == null || delegate == null) {
             serializers.defaultSerializeValue(value, filtering);
         } else {

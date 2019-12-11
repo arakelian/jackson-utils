@@ -49,13 +49,6 @@ public class CoordinateTest {
     }
 
     @Test
-    public void testDecimalRounding() {
-        Assert.assertEquals(51.009830d, Coordinate.round(51.00982963107526d, 6), 0.000001d);
-        Assert.assertEquals(51.0098296d, Coordinate.round(51.00982963107526d, 7), 0.0000001d);
-        Assert.assertEquals(51.00982963d, Coordinate.round(51.00982963107526d, 8), 0.00000001d);
-    }
-
-    @Test
     public void testCoordinateAsArray() throws IOException {
         testJackson("[ -71.34, 41.12 ]", -71.34d, 41.12d);
     }
@@ -63,6 +56,13 @@ public class CoordinateTest {
     @Test
     public void testCoordinateAsString() throws IOException {
         testJackson("\"41.12,-71.34\"", 41.12d, -71.34d);
+    }
+
+    @Test
+    public void testDecimalRounding() {
+        Assert.assertEquals(51.009830d, Coordinate.round(51.00982963107526d, 6), 0.000001d);
+        Assert.assertEquals(51.0098296d, Coordinate.round(51.00982963107526d, 7), 0.0000001d);
+        Assert.assertEquals(51.00982963d, Coordinate.round(51.00982963107526d, 8), 0.00000001d);
     }
 
     @Test

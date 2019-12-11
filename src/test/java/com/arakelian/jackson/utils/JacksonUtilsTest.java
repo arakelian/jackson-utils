@@ -30,9 +30,9 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
+import com.arakelian.jackson.model.Jackson;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -186,6 +186,94 @@ public class JacksonUtilsTest {
     }
 
     @Test
+    public void testDefaultView() {
+        final SensitiveBean bean = sensitiveBean();
+
+        final String expectedCompact = "{\"id\":\"100\",\"name\":\"Greg Arakelian\",\"username\":\"garakelian\",\"password\":\"mysecret\"}";
+
+        final String expectedPretty = "{\n" + //
+                "  \"id\" : \"100\",\n" + //
+                "  \"name\" : \"Greg Arakelian\",\n" + //
+                "  \"username\" : \"garakelian\",\n" + //
+                "  \"password\" : \"mysecret\"\n" + //
+                "}" //
+                        .replace("\n", System.getProperty("line.separator"));
+
+        // ObjectMapper is compact
+        assertEquals(
+                expectedCompact,
+                Jackson.fromDefault() //
+                        .pretty(false) //
+                        .build() //
+                        .toString(bean));
+
+        // ObjectMapper is pretty
+        assertEquals(
+                expectedPretty,
+                Jackson.fromDefault() //
+                        .pretty(true) //
+                        .build() //
+                        .toString(bean));
+
+        // ObjectWriter is compact
+        assertEquals(
+                expectedCompact,
+                Jackson.fromDefault() //
+                        .build() //
+                        .toString(bean, false));
+
+        // ObjectWriter is pretty
+        assertEquals(
+                expectedPretty,
+                Jackson.fromDefault() //
+                        .build() //
+                        .toString(bean, true));
+    }
+
+    @Test
+    public void testEmptyView() {
+        final SensitiveBean bean = sensitiveBean();
+        final String expectedCompact = "{}";
+        final String expectedPretty = "{ }";
+
+        // ObjectMapper is compact
+        assertEquals(
+                expectedCompact,
+                Jackson.fromDefault() //
+                        .view(Views.Empty.class) //
+                        .pretty(false) //
+                        .build() //
+                        .toString(bean));
+
+        // ObjectMapper is pretty
+        assertEquals(
+                expectedPretty,
+                Jackson.fromDefault() //
+                        .view(Views.Empty.class) //
+                        .pretty(true) //
+                        .build() //
+                        .toString(bean));
+
+        // ObjectWriter is compact
+        assertEquals(
+                expectedCompact,
+                Jackson.fromDefault() //
+                        .view(Views.Empty.class) //
+                        .pretty(false) //
+                        .build() //
+                        .toString(bean, false));
+
+        // ObjectWriter is pretty
+        assertEquals(
+                expectedPretty,
+                Jackson.fromDefault() //
+                        .view(Views.Empty.class) //
+                        .pretty(false) //
+                        .build() //
+                        .toString(bean, true));
+    }
+
+    @Test
     public void testJsonCreator() throws IOException {
         // should not have to use @JsonCreator and specify property names with Java 8;
         // also enum should be forced to uppercase for match
@@ -202,39 +290,82 @@ public class JacksonUtilsTest {
     }
 
     @Test
-    public void testSensitive() throws JsonProcessingException {
-        final SensitiveBean bean = new SensitiveBean();
-        bean.setId("100");
-        bean.setName("Greg Arakelian");
-        bean.setUsername("garakelian");
-        bean.setPassword("mysecret");
+    public void testPrivateView() {
+        final SensitiveBean bean = sensitiveBean();
+        final String expectedCompact = "{\"id\":\"100\",\"name\":\"Greg Arakelian\",\"username\":\"garakelian\",\"password\":\"mysecret\"}";
+        final String expectedPretty = "{\n" + //
+                "  \"id\" : \"100\",\n" + //
+                "  \"name\" : \"Greg Arakelian\",\n" + //
+                "  \"username\" : \"garakelian\",\n" + //
+                "  \"password\" : \"mysecret\"\n" + //
+                "}" //
+                        .replace("\n", System.getProperty("line.separator"));
 
-        // should not see anything
-        assertEquals("{}", JacksonUtils.toString(bean, JacksonUtils.getObjectWriter(Views.Empty.class)));
+        // ObjectMapper is compact
+        assertEquals(
+                expectedCompact,
+                Jackson.fromDefault() //
+                        .view(Views.Private.class) //
+                        .pretty(false) //
+                        .build() //
+                        .toString(bean));
 
-        // public fields - with and without pretty formatting
+        // ObjectMapper is pretty
+        assertEquals(
+                expectedPretty,
+                Jackson.fromDefault() //
+                        .view(Views.Private.class) //
+                        .pretty(true) //
+                        .build() //
+                        .toString(bean));
+
+        // ObjectWriter is compact
+        assertEquals(
+                expectedCompact,
+                Jackson.fromDefault() //
+                        .view(Views.Private.class) //
+                        .build() //
+                        .toString(bean, false));
+
+        // ObjectWriter is pretty
+        assertEquals(
+                expectedPretty,
+                Jackson.fromDefault() //
+                        .view(Views.Private.class) //
+                        .build() //
+                        .toString(bean, true));
+    }
+
+    @Test
+    public void testPublicView() {
+        final SensitiveBean bean = sensitiveBean();
+        // public view - compact formatting
         assertEquals(
                 "{\"id\":\"100\",\"name\":\"Greg Arakelian\"}",
-                JacksonUtils.toString(bean, JacksonUtils.getObjectWriter(Views.Public.class)));
+                Jackson.fromDefault() //
+                        .view(Views.Public.class) //
+                        .pretty(false) //
+                        .build() //
+                        .toString(bean));
+
+        // public view - pretty formatting
         assertEquals(
                 "{\n  \"id\" : \"100\",\n  \"name\" : \"Greg Arakelian\"\n}"
                         .replace("\n", System.getProperty("line.separator")),
-                JacksonUtils.toString(bean, JacksonUtils.getObjectWriter(Views.Public.class, true)));
+                Jackson.fromDefault() //
+                        .view(Views.Public.class) //
+                        .pretty(true) //
+                        .build() //
+                        .toString(bean));
 
-        // everything (when no view used, or when private which extends public)
-        final String expected = "{\"id\":\"100\",\"name\":\"Greg Arakelian\",\"username\":\"garakelian\",\"password\":\"mysecret\"}";
-        assertEquals(expected, JacksonUtils.toString(bean, JacksonUtils.getObjectWriter(false)));
-        assertEquals(
-                expected,
-                JacksonUtils.toString(bean, JacksonUtils.getObjectWriter(Views.Private.class)));
     }
 
     @Test
     public void testToJson() {
         JsonAssert.assertJsonEquals(
                 "{\"one\":1,\"two\":2,\"three\":3.0}",
-                JacksonUtils.toJson("one", 1, "two", 2, "three", Double.valueOf(3)).toString());
-        JsonAssert.assertJsonEquals("{}", JacksonUtils.toJson().toString());
+                JacksonUtils.buildJson("one", 1, "two", 2, "three", Double.valueOf(3)).toString());
+        JsonAssert.assertJsonEquals("{}", JacksonUtils.buildJson().toString());
     }
 
     @Test
@@ -318,6 +449,15 @@ public class JacksonUtilsTest {
                         "Multi-tiered zero tolerance productivity",
                         "transition cutting-edge web services"),
                 values);
+    }
+
+    private SensitiveBean sensitiveBean() {
+        final SensitiveBean sensitive = new SensitiveBean();
+        sensitive.setId("100");
+        sensitive.setName("Greg Arakelian");
+        sensitive.setUsername("garakelian");
+        sensitive.setPassword("mysecret");
+        return sensitive;
     }
 
     private void verifyDateSerialization(final String dateString, final ZonedDateTime expected)
