@@ -73,7 +73,7 @@ public abstract class Jackson {
     public static final SimpleModule TRIM_MODULE = new SimpleModule()
             .addDeserializer(String.class, TrimWhitespaceDeserializer.SINGLETON);
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings(value = { "deprecation", "immutables:incompat" })
     private static ObjectMapper DEFAULT_OBJECT_MAPPER = ImmutableJackson.builder() //
             // general configuration
             .locale(Locale.getDefault()) //
