@@ -39,7 +39,7 @@ public final class EnumUppercaseDeserializerModifier extends BeanDeserializerMod
             final JavaType type,
             final BeanDescription beanDesc,
             final JsonDeserializer<?> deserializer) {
-        return new JsonDeserializer<>() {
+        return new JsonDeserializer<Enum>() {
             @SuppressWarnings("unchecked")
             @Override
             public Enum deserialize(final JsonParser jp, final DeserializationContext ctxt)

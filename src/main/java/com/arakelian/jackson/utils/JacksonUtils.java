@@ -74,6 +74,7 @@ public class JacksonUtils {
         return JACKSON.readValue(json, valueType);
     }
 
+    @SuppressWarnings("TypeParameterUnusedInFormals")
     public static <T> T readValue(final String json, final JavaType valueType) throws IOException {
         return JACKSON.readValue(json, valueType);
     }
