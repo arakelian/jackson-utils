@@ -57,6 +57,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 
 @Value.Immutable
 public abstract class Jackson {
@@ -73,47 +74,51 @@ public abstract class Jackson {
     public static final SimpleModule TRIM_MODULE = new SimpleModule()
             .addDeserializer(String.class, TrimWhitespaceDeserializer.SINGLETON);
 
-    @SuppressWarnings(value = { "deprecation", "immutables:incompat" })
-    private static ObjectMapper DEFAULT_OBJECT_MAPPER = ImmutableJackson.builder() //
-            // general configuration
-            .locale(Locale.getDefault()) //
-            .pretty(true) //
-            .serializationInclusion(JsonInclude.Include.NON_EMPTY) //
-
-            // modules
-            .findAndRegisterModules(true) //
-            .addModules(TRIM_MODULE) //
-            .addModules(ENUM_MODULE) //
-            .addModules(DATE_MODULE) //
-
-            // avoid unnecessary exception if module registered automatically and manually
-            .putMapperFeatures(MapperFeature.IGNORE_DUPLICATE_MODULE_REGISTRATIONS, true) //
-
-            // collections are often immutable and not suitable for updates
-            .putMapperFeatures(MapperFeature.USE_GETTERS_AS_SETTERS, false) //
-
-            // forgiving parser
-            .putParserFeatures(JsonParser.Feature.ALLOW_COMMENTS, true) //
-            .putParserFeatures(JsonParser.Feature.ALLOW_YAML_COMMENTS, true) //
-            .putParserFeatures(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true) //
-            .putParserFeatures(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true) //
-            .putParserFeatures(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true) //
-
-            // serialization options
-            .putSerializationFeatures(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false) //
-            .putSerializationFeatures(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false) //
-            .putSerializationFeatures(SerializationFeature.FAIL_ON_EMPTY_BEANS, false) //
-
-            // strict rules regarding data integrity
-            .putDeserializationFeatures(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY, true) //
-            .putDeserializationFeatures(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS, true) //
-            .putDeserializationFeatures(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true) //
-            .putDeserializationFeatures(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true) //
-
-            // we don't want big decimals output in scientific notation
-            .putGeneratorFeatures(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true) //
-            .build() //
+    private static ObjectMapper DEFAULT_OBJECT_MAPPER = defaultBuilder().build() //
             .getObjectMapper();
+
+    @SuppressWarnings(value = { "deprecation", "immutables:incompat" })
+    public static ImmutableJackson.Builder defaultBuilder() {
+        return ImmutableJackson.builder() //
+                // general configuration
+                .locale(Locale.getDefault()) //
+                .pretty(true) //
+                .serializationInclusion(JsonInclude.Include.NON_EMPTY) //
+
+                // modules
+                .findAndRegisterModules(true) //
+                .registerTrimModule(true) //
+                .registerDateModule(true) //
+                .registerEnumModule(true) //
+
+                // avoid unnecessary exception if module registered automatically and manually
+                .putMapperFeatures(MapperFeature.IGNORE_DUPLICATE_MODULE_REGISTRATIONS, true) //
+
+                // collections are often immutable and not suitable for updates
+                .putMapperFeatures(MapperFeature.USE_GETTERS_AS_SETTERS, false) //
+
+                // forgiving parser
+                .putParserFeatures(JsonParser.Feature.ALLOW_COMMENTS, true) //
+                .putParserFeatures(JsonParser.Feature.ALLOW_YAML_COMMENTS, true) //
+                .putParserFeatures(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true) //
+                .putParserFeatures(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true) //
+                .putParserFeatures(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true) //
+
+                // serialization options
+                .putSerializationFeatures(SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false) //
+                .putSerializationFeatures(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false) //
+                .putSerializationFeatures(SerializationFeature.FAIL_ON_EMPTY_BEANS, false) //
+
+                // strict rules regarding data integrity
+                .putDeserializationFeatures(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY, true) //
+                .putDeserializationFeatures(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS, true) //
+                .putDeserializationFeatures(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true) //
+                .putDeserializationFeatures(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true) //
+
+                // we don't want big decimals output in scientific notation
+                .putGeneratorFeatures(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN, true) //
+        ;
+    }
 
     public static ImmutableJackson.Builder from(final ObjectMapper mapper) {
         return ImmutableJackson.builder().defaultMapper(mapper);
@@ -213,7 +218,20 @@ public abstract class Jackson {
 
     public abstract Map<MapperFeature, Boolean> getMapperFeatures();
 
-    public abstract Set<Module> getModules();
+    @Value.Default
+    public Set<Module> getModules() {
+        final ImmutableSet.Builder<Module> modules = ImmutableSet.<Module> builder();
+        if (isRegisterTrimModule()) {
+            modules.add(TRIM_MODULE);
+        }
+        if (isRegisterEnumModule()) {
+            modules.add(ENUM_MODULE);
+        }
+        if (isRegisterDateModule()) {
+            modules.add(DATE_MODULE);
+        }
+        return modules.build();
+    }
 
     @Value.Lazy
     public ObjectMapper getObjectMapper() {
@@ -336,6 +354,21 @@ public abstract class Jackson {
 
     @Nullable
     public abstract Boolean isPretty();
+
+    @Value.Default
+    public boolean isRegisterDateModule() {
+        return true;
+    }
+
+    @Value.Default
+    public boolean isRegisterEnumModule() {
+        return true;
+    }
+
+    @Value.Default
+    public boolean isRegisterTrimModule() {
+        return true;
+    }
 
     public <K, V> MapType mapType(
             final Class<? extends Map> mapClass,
