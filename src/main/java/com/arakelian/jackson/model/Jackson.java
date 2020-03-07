@@ -74,7 +74,7 @@ public abstract class Jackson {
     public static final SimpleModule TRIM_MODULE = new SimpleModule()
             .addDeserializer(String.class, TrimWhitespaceDeserializer.SINGLETON);
 
-    private static ObjectMapper DEFAULT_OBJECT_MAPPER = defaultBuilder().build() //
+    private static final ObjectMapper DEFAULT_OBJECT_MAPPER = defaultBuilder().build() //
             .getObjectMapper();
 
     @SuppressWarnings(value = { "deprecation", "immutables:incompat" })
