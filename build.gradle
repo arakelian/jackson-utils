@@ -52,10 +52,10 @@ multitool {
 }
 
 dependencies {
-    processor 'org.immutables:value:2.8.3'
+    processor 'org.immutables:value:2.8.8'
 
     // annotations
-    compile 'org.immutables:value-annotations:2.8.3'
+    compile 'org.immutables:value-annotations:2.8.8'
     
     // configure errorprone version
     errorprone 'com.google.errorprone:error_prone_core:2.3.4'
@@ -64,29 +64,29 @@ dependencies {
     compile 'com.arakelian:more-commons:2.4.0'
 
     // shadow Guava due to frequent downstream incompatibility issues
-    shadow  'com.google.guava:guava:28.2-jre'
+    shadow  'com.google.guava:guava:29.0-jre'
 
     // shadow because we use very few classes from here and don't want to create
     // unnecessary downstream dependencies
-    shadow  'org.apache.commons:commons-lang3:3.9'
+    shadow  'org.apache.commons:commons-lang3:3.10'
     shadow  'commons-io:commons-io:2.6'
     
     // using Jackson feature set which requires Java 8+
-    compile 'com.fasterxml.jackson.core:jackson-core:2.10.3'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.10.3'
-    compile 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.10.3'
-    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.10.3'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.11.0'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+    compile 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.11.0'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.11.0'
 
     // logging
-    testCompile 'org.apache.logging.log4j:log4j-api:2.13.1'
-    testCompile 'org.apache.logging.log4j:log4j-core:2.13.1'
-    testCompile 'org.apache.logging.log4j:log4j-slf4j-impl:2.13.1'
+    testCompile 'org.apache.logging.log4j:log4j-api:2.13.3'
+    testCompile 'org.apache.logging.log4j:log4j-core:2.13.3'
+    testCompile 'org.apache.logging.log4j:log4j-slf4j-impl:2.13.3'
     testCompile 'org.slf4j:jcl-over-slf4j:1.7.29'
     testCompile 'org.slf4j:jul-to-slf4j:1.7.29'
     compile     'org.slf4j:slf4j-api:1.7.29'
 
     // for unit testing
     testCompile 'junit:junit:4.13'
-    testCompile 'net.javacrumbs.json-unit:json-unit:2.14.0'
+    testCompile 'net.javacrumbs.json-unit:json-unit:2.17.0'
     testCompile 'com.arakelian:more-commons:2.4.0:tests'
 }
