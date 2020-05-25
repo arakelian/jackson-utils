@@ -195,7 +195,7 @@ repositories {
 }
 
 dependencies {
-  compile 'com.arakelian:jackson-utils:3.2.0'
+  compile 'com.arakelian:jackson-utils:3.3.0'
 }
 ```
 

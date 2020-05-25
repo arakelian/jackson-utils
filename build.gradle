@@ -61,7 +61,7 @@ dependencies {
     errorprone 'com.google.errorprone:error_prone_core:2.3.4'
 
     // use Java 11 compatible versions
-    compile 'com.arakelian:more-commons:2.4.0'
+    compile 'com.arakelian:more-commons:2.5.0'
 
     // shadow Guava due to frequent downstream incompatibility issues
     shadow  'com.google.guava:guava:29.0-jre'
@@ -88,5 +88,5 @@ dependencies {
     // for unit testing
     testCompile 'junit:junit:4.13'
     testCompile 'net.javacrumbs.json-unit:json-unit:2.17.0'
-    testCompile 'com.arakelian:more-commons:2.4.0:tests'
+    testCompile 'com.arakelian:more-commons:2.5.0:tests'
 }
