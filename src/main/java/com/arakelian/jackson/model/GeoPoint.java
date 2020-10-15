@@ -160,6 +160,23 @@ public abstract class GeoPoint implements Serializable {
     public static final double DEFAULT_ERROR = 0.000001d;
 
     /**
+     * Returns one of two 32-bit values that were previously interleaved to produce a 64-bit value.
+     *
+     * @param value
+     *            64-bit value that was created by interleaving two 32-bit values
+     * @return one of two previously interleaved values
+     */
+    protected static long deinterleave(long value) {
+        value &= MAGIC[0];
+        value = (value ^ value >>> SHIFT[0]) & MAGIC[1];
+        value = (value ^ value >>> SHIFT[1]) & MAGIC[2];
+        value = (value ^ value >>> SHIFT[2]) & MAGIC[3];
+        value = (value ^ value >>> SHIFT[3]) & MAGIC[4];
+        value = (value ^ value >>> SHIFT[4]) & MAGIC[5];
+        return value;
+    }
+
+    /**
      * Returns a value with the even and odd bits flipped.
      *
      * @param val
@@ -213,23 +230,6 @@ public abstract class GeoPoint implements Serializable {
         return new BigDecimal(Double.toString(value)) //
                 .setScale(places, RoundingMode.HALF_UP) //
                 .doubleValue();
-    }
-
-    /**
-     * Returns one of two 32-bit values that were previously interleaved to produce a 64-bit value.
-     *
-     * @param value
-     *            64-bit value that was created by interleaving two 32-bit values
-     * @return one of two previously interleaved values
-     */
-    protected static long deinterleave(long value) {
-        value &= MAGIC[0];
-        value = (value ^ value >>> SHIFT[0]) & MAGIC[1];
-        value = (value ^ value >>> SHIFT[1]) & MAGIC[2];
-        value = (value ^ value >>> SHIFT[2]) & MAGIC[3];
-        value = (value ^ value >>> SHIFT[3]) & MAGIC[4];
-        value = (value ^ value >>> SHIFT[4]) & MAGIC[5];
-        return value;
     }
 
     @JsonIgnore
@@ -292,20 +292,6 @@ public abstract class GeoPoint implements Serializable {
 
     public abstract double getLon();
 
-    public GeoPoint round(final int places) {
-        final double lat = getLat();
-        final double newLat = round(lat, places);
-        final double lon = getLon();
-        final double newLon = round(lon, places);
-
-        if (Double.doubleToLongBits(lat) == Double.doubleToLongBits(newLat)
-                && Double.doubleToLongBits(lon) == Double.doubleToLongBits(newLon)) {
-            return this;
-        }
-
-        return of(newLat, newLon);
-    }
-
     @Value.Check
     protected GeoPoint normalize() {
         // validates latitude is within standard +/-90 coordinate bounds
@@ -324,5 +310,19 @@ public abstract class GeoPoint implements Serializable {
 
         // round decimals
         return round(DEFAULT_PLACES);
+    }
+
+    public GeoPoint round(final int places) {
+        final double lat = getLat();
+        final double newLat = round(lat, places);
+        final double lon = getLon();
+        final double newLon = round(lon, places);
+
+        if (Double.doubleToLongBits(lat) == Double.doubleToLongBits(newLat)
+                && Double.doubleToLongBits(lon) == Double.doubleToLongBits(newLon)) {
+            return this;
+        }
+
+        return of(newLat, newLon);
     }
 }

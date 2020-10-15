@@ -18,7 +18,7 @@
 package com.arakelian.jackson.utils;
 
 import static net.javacrumbs.jsonunit.JsonAssert.assertJsonEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
@@ -33,6 +33,15 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 public class JacksonTestUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonTestUtils.class);
+
+    private static ObjectMapper configure(ObjectMapper objectMapper) {
+        // configure object mapper
+        if (objectMapper == null) {
+            objectMapper = JacksonUtils.getObjectMapper();
+        }
+        objectMapper = objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        return objectMapper;
+    }
 
     public static <T> T testReadWrite(ObjectMapper objectMapper, final T expected, final Class<T> clazz)
             throws JsonProcessingException, IOException, JsonParseException, JsonMappingException {
@@ -55,14 +64,5 @@ public class JacksonTestUtils {
 
     public static <T> T testReadWrite(final T expected, final Class<T> clazz) throws IOException {
         return testReadWrite(null, expected, clazz);
-    }
-
-    private static ObjectMapper configure(ObjectMapper objectMapper) {
-        // configure object mapper
-        if (objectMapper == null) {
-            objectMapper = JacksonUtils.getObjectMapper();
-        }
-        objectMapper = objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-        return objectMapper;
     }
 }

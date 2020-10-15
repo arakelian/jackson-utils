@@ -193,6 +193,24 @@ public abstract class Jackson {
         }
     }
 
+    private ObjectWriter createObjectWriter(final Class<?> view, final boolean pretty) {
+        final ObjectMapper mapper = getObjectMapper();
+
+        if (view != null) {
+            if (pretty) {
+                return mapper.writerWithView(view).withDefaultPrettyPrinter();
+            } else {
+                return mapper.writerWithView(view).withoutFeatures(SerializationFeature.INDENT_OUTPUT);
+            }
+        } else {
+            if (pretty) {
+                return mapper.writerWithDefaultPrettyPrinter();
+            } else {
+                return mapper.writer().withoutFeatures(SerializationFeature.INDENT_OUTPUT);
+            }
+        }
+    }
+
     @Override
     public boolean equals(final Object obj) {
         // use reference equality
@@ -447,24 +465,6 @@ public abstract class Jackson {
             return w.writeValueAsString(value);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
-        }
-    }
-
-    private ObjectWriter createObjectWriter(final Class<?> view, final boolean pretty) {
-        final ObjectMapper mapper = getObjectMapper();
-
-        if (view != null) {
-            if (pretty) {
-                return mapper.writerWithView(view).withDefaultPrettyPrinter();
-            } else {
-                return mapper.writerWithView(view).withoutFeatures(SerializationFeature.INDENT_OUTPUT);
-            }
-        } else {
-            if (pretty) {
-                return mapper.writerWithDefaultPrettyPrinter();
-            } else {
-                return mapper.writer().withoutFeatures(SerializationFeature.INDENT_OUTPUT);
-            }
         }
     }
 }

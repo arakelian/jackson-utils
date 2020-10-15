@@ -126,6 +126,10 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
      */
     public static final double NULL_ORDINATE = Double.NaN;
 
+    private static boolean equalsWithTolerance(final double x1, final double x2, final double tolerance) {
+        return Math.abs(x1 - x2) <= tolerance;
+    }
+
     public static Coordinate of(final double x, final double y) {
         return ImmutableCoordinate.builder() //
                 .x(x) //
@@ -176,10 +180,6 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
         return new BigDecimal(Double.toString(value)) //
                 .setScale(places, RoundingMode.HALF_UP) //
                 .doubleValue();
-    }
-
-    private static boolean equalsWithTolerance(final double x1, final double x2, final double tolerance) {
-        return Math.abs(x1 - x2) <= tolerance;
     }
 
     /**
@@ -300,6 +300,22 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
         return NULL_ORDINATE;
     }
 
+    @Value.Check
+    protected Coordinate normalize() {
+        final double x = getX();
+        if (Double.isNaN(x)) {
+            throw new IllegalArgumentException("invalid x: " + x);
+        }
+
+        final double y = getY();
+        if (Double.isNaN(y)) {
+            throw new IllegalArgumentException("invalid y: " + y);
+        }
+
+        // round decimals
+        return round(DEFAULT_PLACES);
+    }
+
     public Coordinate round(final int places) {
         final double x = getX();
         final double newX = round(x, places);
@@ -325,21 +341,5 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
     @Override
     public String toString() {
         return "(" + getX() + ", " + getY() + ", " + getZ() + ")";
-    }
-
-    @Value.Check
-    protected Coordinate normalize() {
-        final double x = getX();
-        if (Double.isNaN(x)) {
-            throw new IllegalArgumentException("invalid x: " + x);
-        }
-
-        final double y = getY();
-        if (Double.isNaN(y)) {
-            throw new IllegalArgumentException("invalid y: " + y);
-        }
-
-        // round decimals
-        return round(DEFAULT_PLACES);
     }
 }

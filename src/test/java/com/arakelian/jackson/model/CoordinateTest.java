@@ -17,12 +17,12 @@
 
 package com.arakelian.jackson.model;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.arakelian.core.utils.SerializableTestUtils;
 import com.arakelian.jackson.utils.JacksonTestUtils;
@@ -60,9 +60,9 @@ public class CoordinateTest {
 
     @Test
     public void testDecimalRounding() {
-        Assert.assertEquals(51.009830d, Coordinate.round(51.00982963107526d, 6), 0.000001d);
-        Assert.assertEquals(51.0098296d, Coordinate.round(51.00982963107526d, 7), 0.0000001d);
-        Assert.assertEquals(51.00982963d, Coordinate.round(51.00982963107526d, 8), 0.00000001d);
+        Assertions.assertEquals(51.009830d, Coordinate.round(51.00982963107526d, 6), 0.000001d);
+        Assertions.assertEquals(51.0098296d, Coordinate.round(51.00982963107526d, 7), 0.0000001d);
+        Assertions.assertEquals(51.00982963d, Coordinate.round(51.00982963107526d, 8), 0.00000001d);
     }
 
     @Test
@@ -71,17 +71,17 @@ public class CoordinateTest {
         JacksonTestUtils.testReadWrite(POINT3D, Coordinate.class);
     }
 
-    @Test
-    public void testSerializable() {
-        SerializableTestUtils.testSerializable(POINT2D, Coordinate.class);
-        SerializableTestUtils.testSerializable(POINT3D, Coordinate.class);
-    }
-
     private Coordinate testJackson(final String value, final double x, final double y) throws IOException {
         final ObjectMapper mapper = JacksonUtils.getObjectMapper();
         final Coordinate point = mapper.readValue(value, Coordinate.class);
         assertEquals(x, point.getX(), 0.001d);
         assertEquals(y, point.getY(), 0.001d);
         return point;
+    }
+
+    @Test
+    public void testSerializable() {
+        SerializableTestUtils.testSerializable(POINT2D, Coordinate.class);
+        SerializableTestUtils.testSerializable(POINT3D, Coordinate.class);
     }
 }

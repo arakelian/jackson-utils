@@ -33,10 +33,6 @@ public class ExcludeSerializer<T> extends JsonSerializer<T> {
     private final Set<String> excludes;
     private final JsonSerializer<Object> delegate;
 
-    public ExcludeSerializer(final Class<T> handledType, final String... excludes) {
-        this(handledType, null, excludes);
-    }
-
     public ExcludeSerializer(
             final Class<T> handledType,
             final JsonSerializer<Object> delegate,
@@ -44,6 +40,10 @@ public class ExcludeSerializer<T> extends JsonSerializer<T> {
         this.handledType = Preconditions.checkNotNull(handledType);
         this.delegate = delegate;
         this.excludes = ImmutableSet.copyOf(excludes);
+    }
+
+    public ExcludeSerializer(final Class<T> handledType, final String... excludes) {
+        this(handledType, null, excludes);
     }
 
     @Override

@@ -64,11 +64,6 @@ public class TrimWhitespaceDeserializer extends StdScalarDeserializer<String> {
         return deserialize(p, ctxt);
     }
 
-    @Override
-    public boolean isCachable() {
-        return true;
-    }
-
     private String doDeserialize(final JsonParser p, final DeserializationContext context)
             throws IOException {
         if (p.hasToken(JsonToken.VALUE_STRING)) {
@@ -107,5 +102,10 @@ public class TrimWhitespaceDeserializer extends StdScalarDeserializer<String> {
 
         // could not perform coercion
         return (String) context.handleUnexpectedToken(_valueClass, p);
+    }
+
+    @Override
+    public boolean isCachable() {
+        return true;
     }
 }

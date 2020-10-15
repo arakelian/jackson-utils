@@ -189,22 +189,6 @@ public abstract class AbstractMapPath implements Serializable {
         return ImmutableMap.of();
     }
 
-    public String getString(final String path) {
-        return get(path, String.class);
-    }
-
-    public ZonedDateTime getZonedDateTime(final String path) {
-        return get(path, ZonedDateTime.class);
-    }
-
-    public boolean hasProperty(final String path) {
-        return find(path, value -> value != null, false);
-    }
-
-    public void setObjectMapper(final ObjectMapper mapper) {
-        this.mapper = mapper;
-    }
-
     protected String getSegment(final String path, final int start, final Map map) {
         final int length = path.length();
 
@@ -219,5 +203,21 @@ public abstract class AbstractMapPath implements Serializable {
         }
 
         return path.substring(start);
+    }
+
+    public String getString(final String path) {
+        return get(path, String.class);
+    }
+
+    public ZonedDateTime getZonedDateTime(final String path) {
+        return get(path, ZonedDateTime.class);
+    }
+
+    public boolean hasProperty(final String path) {
+        return find(path, value -> value != null, false);
+    }
+
+    public void setObjectMapper(final ObjectMapper mapper) {
+        this.mapper = mapper;
     }
 }

@@ -86,6 +86,155 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
         this.excludes = excludes != null ? excludes : ImmutableSet.of();
     }
 
+    protected void afterValue() {
+        resetField();
+    }
+
+    protected String getCurrentPath() {
+        final StringBuilder path = new StringBuilder();
+        for (final Context context : contexts) {
+            context.buildPath(path);
+        }
+        if (fieldName != null) {
+            path.append(CONTEXT_SEPARATOR);
+            path.append(fieldName);
+        }
+        if (path.length() == 0) {
+            path.append(CONTEXT_SEPARATOR);
+        }
+        return path.toString();
+    }
+
+    private boolean hasArrayBrackets(final CharSequence path, final int index) {
+        return index + 1 < path.length() //
+                && path.charAt(index) == ARRAY_BRACKETS.charAt(0) //
+                && path.charAt(index + 1) == ARRAY_BRACKETS.charAt(1);
+    }
+
+    private boolean isRoot(final CharSequence path) {
+        return StringUtils.equals(".", path);
+    }
+
+    private boolean pathStartsWith(
+            final CharSequence path,
+            final CharSequence prefix,
+            final boolean excluding) {
+        if (path == prefix) {
+            return true;
+        }
+        if (path == null || prefix == null) {
+            return false;
+        }
+
+        // compare as much as we can
+        final int pathLength = path.length();
+        final int prefixLength = prefix.length();
+        final int length = Math.min(pathLength, prefixLength);
+        for (int i = 0; i < length; ++i) {
+            if (path.charAt(i) != prefix.charAt(0 + i)) {
+                return false;
+            }
+        }
+
+        if (pathLength == prefixLength) {
+            // exact match
+            return true;
+        }
+
+        if (pathLength > prefixLength) {
+            // we have matched prefixLength; path must start with prefix + "/"
+            final boolean test = path.charAt(prefixLength) == CONTEXT_SEPARATOR
+                    || hasArrayBrackets(path, prefixLength);
+            return test;
+        }
+
+        // we have matched pathLength; do we need to go deeper for a match?
+        final boolean test = isRoot(path) || prefix.charAt(pathLength) == CONTEXT_SEPARATOR
+                || hasArrayBrackets(prefix, pathLength);
+        return test ? !excluding : false;
+    }
+
+    protected void resetField() {
+        fieldName = null;
+    }
+
+    protected boolean test() {
+        final boolean test = test_();
+
+        if (LOGGER.isTraceEnabled()) {
+            final StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+            for (final StackTraceElement e : trace) {
+                final String m = e.getMethodName();
+                if (StringUtils.startsWith(m, "write")) {
+                    LOGGER.trace("{} {}: {}", getCurrentPath(), m, test);
+                    break;
+                }
+            }
+        }
+        return test;
+    }
+
+    protected boolean test_() {
+        // have we pre-computed value for this depth?
+        final int depth = contexts.size();
+        if (depth != 0) {
+            final Context current = contexts.get(depth - 1);
+            if (current.test != null) {
+                return current.test.booleanValue();
+            }
+        }
+
+        final String path = getCurrentPath();
+
+        // excludes are always processed first!
+        if (excludes != null) {
+            for (final String exclude : excludes) {
+                if (pathStartsWith(path, exclude, true)) {
+                    return false;
+                }
+            }
+        }
+
+        // include when specifically asked to do so
+        if (includes != null) {
+            for (final String include : includes) {
+                if (pathStartsWith(path, include, false)) {
+                    return true;
+                }
+            }
+        }
+
+        // if client specified which fields to include, it must be on that
+        // list; otherwise, everything included by default
+        return includes == null || includes.size() == 0;
+    }
+
+    protected boolean testEnd(final Type type) {
+        final int depth = contexts.size();
+        Preconditions.checkState(depth != 0, "extra call to writeEndArray or writeEndObject");
+
+        final Context current = contexts.remove(depth - 1);
+        Preconditions.checkState(current.type.equals(type), "mismatch start/end of %s", type);
+        if (current.test != null) {
+            return current.test.booleanValue();
+        }
+        return true;
+    }
+
+    protected boolean testStartArray() {
+        final boolean test = test();
+        contexts.add(new Context(Type.ARRAY, fieldName, test ? null : Boolean.FALSE));
+        resetField();
+        return test;
+    }
+
+    protected boolean testStartObject() {
+        final boolean test = test();
+        contexts.add(new Context(Type.OBJECT, fieldName, test ? null : Boolean.FALSE));
+        resetField();
+        return test;
+    }
+
     @Override
     public String toString() {
         return getCurrentPath();
@@ -381,154 +530,5 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
             delegate.writeUTF8String(text, offset, length);
             afterValue();
         }
-    }
-
-    private boolean hasArrayBrackets(final CharSequence path, final int index) {
-        return index + 1 < path.length() //
-                && path.charAt(index) == ARRAY_BRACKETS.charAt(0) //
-                && path.charAt(index + 1) == ARRAY_BRACKETS.charAt(1);
-    }
-
-    private boolean isRoot(final CharSequence path) {
-        return StringUtils.equals(".", path);
-    }
-
-    private boolean pathStartsWith(
-            final CharSequence path,
-            final CharSequence prefix,
-            final boolean excluding) {
-        if (path == prefix) {
-            return true;
-        }
-        if (path == null || prefix == null) {
-            return false;
-        }
-
-        // compare as much as we can
-        final int pathLength = path.length();
-        final int prefixLength = prefix.length();
-        final int length = Math.min(pathLength, prefixLength);
-        for (int i = 0; i < length; ++i) {
-            if (path.charAt(i) != prefix.charAt(0 + i)) {
-                return false;
-            }
-        }
-
-        if (pathLength == prefixLength) {
-            // exact match
-            return true;
-        }
-
-        if (pathLength > prefixLength) {
-            // we have matched prefixLength; path must start with prefix + "/"
-            final boolean test = path.charAt(prefixLength) == CONTEXT_SEPARATOR
-                    || hasArrayBrackets(path, prefixLength);
-            return test;
-        }
-
-        // we have matched pathLength; do we need to go deeper for a match?
-        final boolean test = isRoot(path) || prefix.charAt(pathLength) == CONTEXT_SEPARATOR
-                || hasArrayBrackets(prefix, pathLength);
-        return test ? !excluding : false;
-    }
-
-    protected void afterValue() {
-        resetField();
-    }
-
-    protected String getCurrentPath() {
-        final StringBuilder path = new StringBuilder();
-        for (final Context context : contexts) {
-            context.buildPath(path);
-        }
-        if (fieldName != null) {
-            path.append(CONTEXT_SEPARATOR);
-            path.append(fieldName);
-        }
-        if (path.length() == 0) {
-            path.append(CONTEXT_SEPARATOR);
-        }
-        return path.toString();
-    }
-
-    protected void resetField() {
-        fieldName = null;
-    }
-
-    protected boolean test() {
-        final boolean test = test_();
-
-        if (LOGGER.isTraceEnabled()) {
-            final StackTraceElement[] trace = Thread.currentThread().getStackTrace();
-            for (final StackTraceElement e : trace) {
-                final String m = e.getMethodName();
-                if (StringUtils.startsWith(m, "write")) {
-                    LOGGER.trace("{} {}: {}", getCurrentPath(), m, test);
-                    break;
-                }
-            }
-        }
-        return test;
-    }
-
-    protected boolean test_() {
-        // have we pre-computed value for this depth?
-        final int depth = contexts.size();
-        if (depth != 0) {
-            final Context current = contexts.get(depth - 1);
-            if (current.test != null) {
-                return current.test.booleanValue();
-            }
-        }
-
-        final String path = getCurrentPath();
-
-        // excludes are always processed first!
-        if (excludes != null) {
-            for (final String exclude : excludes) {
-                if (pathStartsWith(path, exclude, true)) {
-                    return false;
-                }
-            }
-        }
-
-        // include when specifically asked to do so
-        if (includes != null) {
-            for (final String include : includes) {
-                if (pathStartsWith(path, include, false)) {
-                    return true;
-                }
-            }
-        }
-
-        // if client specified which fields to include, it must be on that
-        // list; otherwise, everything included by default
-        return includes == null || includes.size() == 0;
-    }
-
-    protected boolean testEnd(final Type type) {
-        final int depth = contexts.size();
-        Preconditions.checkState(depth != 0, "extra call to writeEndArray or writeEndObject");
-
-        final Context current = contexts.remove(depth - 1);
-        Preconditions.checkState(current.type.equals(type), "mismatch start/end of %s", type);
-        if (current.test != null) {
-            return current.test.booleanValue();
-        }
-        return true;
-    }
-
-    protected boolean testStartArray() {
-        final boolean test = test();
-        contexts.add(new Context(Type.ARRAY, fieldName, test ? null : Boolean.FALSE));
-        resetField();
-        return test;
-    }
-
-    protected boolean testStartObject() {
-        final boolean test = test();
-        contexts.add(new Context(Type.OBJECT, fieldName, test ? null : Boolean.FALSE));
-        resetField();
-        return test;
     }
 }

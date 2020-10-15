@@ -1,5 +1,7 @@
 package com.arakelian.jackson;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -11,11 +13,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
-@RunWith(Parameterized.class)
 public class FilteringJsonGeneratorTest {
     public static class FilterParser {
         private static final Splitter COMMA_SPLITTER = Splitter.on(Pattern.compile("\\s*,\\s*")).trimResults()
@@ -46,7 +45,7 @@ public class FilteringJsonGeneratorTest {
 
         public Collection<Object[]> data() throws IOException {
             final URL url = FilterParser.class.getResource(resource);
-            Assert.assertTrue("Resource does not exist: " + resource, url != null);
+            assertTrue(url != null, "Resource does not exist: " + resource);
             final String content = Resources.toString(url, Charsets.UTF_8);
 
             final List<Object[]> data = Lists.newArrayList();
@@ -131,35 +130,8 @@ public class FilteringJsonGeneratorTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilteringJsonGeneratorTest.class);
 
-    @Parameters(name = "{0}")
     public static Collection<Object[]> data() throws IOException {
         return new FilterParser("/filter.test").data();
-    }
-
-    protected final String testName;
-    private final Set<String> includes;
-    private final Set<String> excludes;
-    private final String input;
-
-    private final String expected;
-
-    public FilteringJsonGeneratorTest(
-            final String testName,
-            final Set<String> includes,
-            final Set<String> excludes,
-            final String input,
-            final String expected) {
-        this.testName = Preconditions.checkNotNull(testName);
-        this.includes = Preconditions.checkNotNull(includes);
-        this.excludes = Preconditions.checkNotNull(excludes);
-        this.input = Preconditions.checkNotNull(input);
-        this.expected = Preconditions.checkNotNull(expected);
-    }
-
-    @Test
-    public void test() throws IOException {
-        LOGGER.debug("Starting {}", testName);
-        Assert.assertEquals(expected, filter(input, includes, excludes));
     }
 
     private String filter(final String json, final Set<String> include, final Set<String> exclude)
@@ -173,5 +145,17 @@ public class FilteringJsonGeneratorTest {
             filtering.writeObject(node);
             return writer.toString();
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("data")
+    public void test(
+            final String testName,
+            final Set<String> includes,
+            final Set<String> excludes,
+            final String input,
+            final String expected) throws IOException {
+        LOGGER.debug("Starting {}", testName);
+        Assertions.assertEquals(expected, filter(input, includes, excludes));
     }
 }

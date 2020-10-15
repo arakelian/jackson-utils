@@ -17,13 +17,13 @@
 
 package com.arakelian.jackson.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.io.IOException;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.arakelian.core.utils.SerializableTestUtils;
 import com.arakelian.jackson.utils.JacksonTestUtils;
@@ -46,16 +46,16 @@ public class GeoPointTest {
 
     @Test
     public void testDecimalRounding() {
-        Assert.assertEquals(51.009830d, GeoPoint.round(51.00982963107526d, 6), 0.000001d);
-        Assert.assertEquals(51.0098296d, GeoPoint.round(51.00982963107526d, 7), 0.0000001d);
-        Assert.assertEquals(51.00982963d, GeoPoint.round(51.00982963107526d, 8), 0.00000001d);
+        Assertions.assertEquals(51.009830d, GeoPoint.round(51.00982963107526d, 6), 0.000001d);
+        Assertions.assertEquals(51.0098296d, GeoPoint.round(51.00982963107526d, 7), 0.0000001d);
+        Assertions.assertEquals(51.00982963d, GeoPoint.round(51.00982963107526d, 8), 0.00000001d);
     }
 
     @Test
     public void testGeohash() throws IOException {
         final GeoPoint point = testJackson("\"drm3btev3e86\"", 41.12d, -71.34d);
-        Assert.assertEquals(POINT, point.round(6));
-        Assert.assertEquals("drm3btev3e86", point.getGeohash());
+        Assertions.assertEquals(POINT, point.round(6));
+        Assertions.assertEquals("drm3btev3e86", point.getGeohash());
     }
 
     @Test
@@ -76,35 +76,22 @@ public class GeoPointTest {
         testJackson("\"41.12,-71.34\"", 41.12d, -71.34d);
     }
 
-    @Test(expected = JsonMappingException.class)
-    public void testInvalidGeoPointJson() throws IOException {
-        // should be 'lat' and 'lon' (not 'lng')
-        testJackson("{ \n" + //
-                "    \"lat\": 41.12,\n" + //
-                "    \"lng\": -71.34\n" + //
-                "  }", 41.12d, -71.34d);
+    @Test
+    public void testInvalidGeoPointJson() {
+        Assertions.assertThrows(
+                JsonMappingException.class,
+                () -> {
+                    // should be 'lat' and 'lon' (not 'lng')
+                    testJackson("{ \n" + //
+                    "    \"lat\": 41.12,\n" + //
+                    "    \"lng\": -71.34\n" + //
+                    "  }", 41.12d, -71.34d);
+                });
     }
 
     @Test
     public void testJackson() throws IOException {
         JacksonTestUtils.testReadWrite(POINT, GeoPoint.class);
-    }
-
-    @Test
-    public void testRounding() {
-        final GeoPoint point = GeoPoint.of("drm3btev3e86");
-        Assert.assertEquals("drm3btev3e86", point.getGeohash());
-
-        for (int places = 0; places < 10; places++) {
-            final GeoPoint rounded = point.round(places);
-            assertSame(rounded, rounded.round(places));
-        }
-        Assert.assertEquals(POINT, point.round(6));
-    }
-
-    @Test
-    public void testSerializable() {
-        SerializableTestUtils.testSerializable(POINT, GeoPoint.class);
     }
 
     private GeoPoint testJackson(final String value, final double lat, final double lon) throws IOException {
@@ -113,5 +100,22 @@ public class GeoPointTest {
         assertEquals(lat, point.getLat(), 0.001d);
         assertEquals(lon, point.getLon(), 0.001d);
         return point;
+    }
+
+    @Test
+    public void testRounding() {
+        final GeoPoint point = GeoPoint.of("drm3btev3e86");
+        Assertions.assertEquals("drm3btev3e86", point.getGeohash());
+
+        for (int places = 0; places < 10; places++) {
+            final GeoPoint rounded = point.round(places);
+            assertSame(rounded, rounded.round(places));
+        }
+        Assertions.assertEquals(POINT, point.round(6));
+    }
+
+    @Test
+    public void testSerializable() {
+        SerializableTestUtils.testSerializable(POINT, GeoPoint.class);
     }
 }

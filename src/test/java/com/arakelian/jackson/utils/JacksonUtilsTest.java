@@ -17,8 +17,9 @@
 
 package com.arakelian.jackson.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static net.javacrumbs.jsonunit.JsonAssert.assertJsonEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -28,7 +29,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.arakelian.jackson.model.Jackson;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -36,8 +37,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-
-import net.javacrumbs.jsonunit.JsonAssert;
 
 public class JacksonUtilsTest {
     public static enum Gender {
@@ -159,6 +158,15 @@ public class JacksonUtilsTest {
 
         public static class Public {
         }
+    }
+
+    private SensitiveBean sensitiveBean() {
+        final SensitiveBean sensitive = new SensitiveBean();
+        sensitive.setId("100");
+        sensitive.setName("Greg Arakelian");
+        sensitive.setUsername("garakelian");
+        sensitive.setPassword("mysecret");
+        return sensitive;
     }
 
     @Test
@@ -362,10 +370,10 @@ public class JacksonUtilsTest {
 
     @Test
     public void testToJson() {
-        JsonAssert.assertJsonEquals(
+        assertJsonEquals(
                 "{\"one\":1,\"two\":2,\"three\":3.0}",
                 JacksonUtils.buildJson("one", 1, "two", 2, "three", Double.valueOf(3)).toString());
-        JsonAssert.assertJsonEquals("{}", JacksonUtils.buildJson().toString());
+        assertJsonEquals("{}", JacksonUtils.buildJson().toString());
     }
 
     @Test
@@ -449,15 +457,6 @@ public class JacksonUtilsTest {
                         "Multi-tiered zero tolerance productivity",
                         "transition cutting-edge web services"),
                 values);
-    }
-
-    private SensitiveBean sensitiveBean() {
-        final SensitiveBean sensitive = new SensitiveBean();
-        sensitive.setId("100");
-        sensitive.setName("Greg Arakelian");
-        sensitive.setUsername("garakelian");
-        sensitive.setPassword("mysecret");
-        return sensitive;
     }
 
     private void verifyDateSerialization(final String dateString, final ZonedDateTime expected)
