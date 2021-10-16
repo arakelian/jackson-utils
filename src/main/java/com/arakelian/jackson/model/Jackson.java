@@ -251,6 +251,7 @@ public abstract class Jackson {
         return modules.build();
     }
 
+    @SuppressWarnings("deprecation")
     @Value.Lazy
     public ObjectMapper getObjectMapper() {
         final ObjectMapper mapper;

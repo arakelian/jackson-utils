@@ -450,6 +450,7 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void writeStartArray(final int size) throws IOException {
         if (testStartArray()) {
