@@ -43,6 +43,15 @@ wrapper {
 }
 
 publishing.publications.mavenJava {
+    from components.java
+    versionMapping {
+        usage('java-api') {
+            fromResolutionOf('runtimeClasspath')
+        }
+        usage('java-runtime') {
+            fromResolutionResult()
+        }
+    }
     pom {
         name = "Jackson Utils"
         description = "Utilities for reading and writing JSON and XML using Jackson."
@@ -69,6 +78,14 @@ publishing.publications.mavenJava {
             url = 'https://github.com/arakelian/jackson-utils.git'
         }
     }
+	pom.withXml {
+		Node pomNode = asNode()
+		pomNode.dependencies.'*'.findAll() {
+		    it.artifactId.text() in [ 'value-annotations', 'guava', 'commons-io', 'commons-lang3' ]
+		}.each() {
+		    it.parent().remove(it)
+		}
+	}
 }
 
 dependencies {
