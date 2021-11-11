@@ -18,6 +18,7 @@
 package com.arakelian.jackson.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import com.arakelian.core.utils.SerializableTestUtils;
 import com.arakelian.jackson.utils.JacksonTestUtils;
 import com.arakelian.jackson.utils.JacksonUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -52,10 +54,19 @@ public class GeoPointTest {
     }
 
     @Test
+    public void testEmpty() throws JsonMappingException, JsonProcessingException {
+        assertNull(GeoPoint.of(null));
+        assertNull(GeoPoint.of(""));
+        final ObjectMapper mapper = JacksonUtils.getObjectMapper();
+        assertNull(mapper.readValue("null", GeoPoint.class));
+        assertNull(mapper.readValue("\"\"", GeoPoint.class));
+    }
+
+    @Test
     public void testGeohash() throws IOException {
         final GeoPoint point = testJackson("\"drm3btev3e86\"", 41.12d, -71.34d);
-        Assertions.assertEquals(POINT, point.round(6));
-        Assertions.assertEquals("drm3btev3e86", point.getGeohash());
+        assertEquals(POINT, point.round(6));
+        assertEquals("drm3btev3e86", point.getGeohash());
     }
 
     @Test
@@ -78,15 +89,13 @@ public class GeoPointTest {
 
     @Test
     public void testInvalidGeoPointJson() {
-        Assertions.assertThrows(
-                JsonMappingException.class,
-                () -> {
-                    // should be 'lat' and 'lon' (not 'lng')
-                    testJackson("{ \n" + //
-                    "    \"lat\": 41.12,\n" + //
-                    "    \"lng\": -71.34\n" + //
-                    "  }", 41.12d, -71.34d);
-                });
+        Assertions.assertThrows(JsonMappingException.class, () -> {
+            // should be 'lat' and 'lon' (not 'lng')
+            testJackson("{ \n" + //
+            "    \"lat\": 41.12,\n" + //
+            "    \"lng\": -71.34\n" + //
+            "  }", 41.12d, -71.34d);
+        });
     }
 
     @Test

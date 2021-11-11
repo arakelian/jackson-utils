@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -82,7 +83,8 @@ public abstract class GeoPoint implements Serializable {
             if (node instanceof TextNode) {
                 final TextNode text = (TextNode) node;
                 final String v = text.asText("");
-                return of(v);
+                GeoPoint point = of(v);
+                return point;
             }
 
             // always throws exception
@@ -195,6 +197,10 @@ public abstract class GeoPoint implements Serializable {
     }
 
     public static GeoPoint of(final String value) {
+        if(StringUtils.isEmpty(value)) {
+            return null;
+        }
+        
         final double lat;
         final double lon;
 
