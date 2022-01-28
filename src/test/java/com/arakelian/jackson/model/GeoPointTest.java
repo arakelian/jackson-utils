@@ -20,6 +20,7 @@ package com.arakelian.jackson.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 
@@ -32,6 +33,7 @@ import com.arakelian.jackson.utils.JacksonUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 public class GeoPointTest {
     public static final GeoPoint POINT = ImmutableGeoPoint.builder() //
@@ -57,41 +59,63 @@ public class GeoPointTest {
     public void testEmpty() throws JsonMappingException, JsonProcessingException {
         assertNull(GeoPoint.of(null));
         assertNull(GeoPoint.of(""));
-        final ObjectMapper mapper = JacksonUtils.getObjectMapper();
-        assertNull(mapper.readValue("null", GeoPoint.class));
-        assertNull(mapper.readValue("\"\"", GeoPoint.class));
+        assertNull(convertValueToGeoPoint("null"));
+        assertNull(convertValueToGeoPoint("\"\""));
     }
 
     @Test
     public void testGeohash() throws IOException {
-        final GeoPoint point = testJackson("\"drm3btev3e86\"", 41.12d, -71.34d);
+        final GeoPoint point = assertConvertValue("\"drm3btev3e86\"", 41.12d, -71.34d);
         assertEquals(POINT, point.round(6));
         assertEquals("drm3btev3e86", point.getGeohash());
     }
 
     @Test
     public void testGeoPointAsArray() throws IOException {
-        testJackson("[ -71.34, 41.12 ]", 41.12d, -71.34d);
+        assertConvertValue("[ -71.34, 41.12 ]", 41.12d, -71.34d);
+        assertThrows(MismatchedInputException.class, () -> {
+            convertValueToGeoPoint("[ \"not\", \"number\" ]");
+        });
+        assertThrows(MismatchedInputException.class, () -> {
+            convertValueToGeoPoint("[ 71.34 ]");
+        });
+        assertThrows(MismatchedInputException.class, () -> {
+            convertValueToGeoPoint("[ 1,2,3 ]");
+        });
     }
 
     @Test
     public void testGeoPointAsObject() throws IOException {
-        testJackson("{ \n" + //
+        assertConvertValue("{ \n" + //
                 "    \"lat\": 41.12,\n" + //
                 "    \"lon\": -71.34\n" + //
                 "  }", 41.12d, -71.34d);
+
+        assertThrows(MismatchedInputException.class, () -> {
+            convertValueToGeoPoint("{ \n" + //
+            "    \"lat\": \"blah\",\n" + //
+            "    \"lon\": null\n" + //
+            "  }");
+        });
+
+        assertThrows(MismatchedInputException.class, () -> {
+            convertValueToGeoPoint("{ \n" + //
+            "    \"lat\": null,\n" + //
+            "    \"lon\": null\n" + //
+            "  }");
+        });
     }
 
     @Test
     public void testGeoPointAsString() throws IOException {
-        testJackson("\"41.12,-71.34\"", 41.12d, -71.34d);
+        assertConvertValue("\"41.12,-71.34\"", 41.12d, -71.34d);
     }
 
     @Test
     public void testInvalidGeoPointJson() {
-        Assertions.assertThrows(JsonMappingException.class, () -> {
+        assertThrows(JsonMappingException.class, () -> {
             // should be 'lat' and 'lon' (not 'lng')
-            testJackson("{ \n" + //
+            assertConvertValue("{ \n" + //
             "    \"lat\": 41.12,\n" + //
             "    \"lng\": -71.34\n" + //
             "  }", 41.12d, -71.34d);
@@ -103,11 +127,18 @@ public class GeoPointTest {
         JacksonTestUtils.testReadWrite(POINT, GeoPoint.class);
     }
 
-    private GeoPoint testJackson(final String value, final double lat, final double lon) throws IOException {
-        final ObjectMapper mapper = JacksonUtils.getObjectMapper();
-        final GeoPoint point = mapper.readValue(value, GeoPoint.class);
+    private GeoPoint assertConvertValue(final String value, final double lat, final double lon)
+            throws IOException {
+        final GeoPoint point = convertValueToGeoPoint(value);
         assertEquals(lat, point.getLat(), 0.001d);
         assertEquals(lon, point.getLon(), 0.001d);
+        return point;
+    }
+
+    private GeoPoint convertValueToGeoPoint(final String value)
+            throws JsonProcessingException, JsonMappingException {
+        final ObjectMapper mapper = JacksonUtils.getObjectMapper();
+        final GeoPoint point = mapper.readValue(value, GeoPoint.class);
         return point;
     }
 

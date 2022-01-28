@@ -53,9 +53,9 @@ public abstract class GeoPoint implements Serializable {
                 final ObjectNode obj = (ObjectNode) node;
                 final JsonNode lat = obj.get("lat");
                 final JsonNode lon = obj.get("lon");
-                if (lat == null || lon == null) {
+                if (lat == null || lon == null || !lat.isNumber() || !lon.isNumber()) {
                     // always throws exception
-                    ctxt.reportInputMismatch(this, "Expecting object with 'lat' and 'lon' fields");
+                    ctxt.reportInputMismatch(this, "Expecting object with numeric 'lat' and 'lon' fields");
                     return null;
                 }
                 return ImmutableGeoPoint.builder() //
@@ -74,10 +74,16 @@ public abstract class GeoPoint implements Serializable {
                             arr.size());
                     return null;
                 }
-                return ImmutableGeoPoint.builder() //
-                        .lon(arr.get(0).asDouble()) //
-                        .lat(arr.get(1).asDouble()) //
-                        .build();
+                JsonNode lonNode = arr.get(0);
+                JsonNode latNode = arr.get(1);
+                if (lonNode.isNumber() && latNode.isNumber()) {
+                    return ImmutableGeoPoint.builder() //
+                            .lon(lonNode.asDouble()) //
+                            .lat(latNode.asDouble()) //
+                            .build();
+                }
+                ctxt.reportInputMismatch(this, "Expecting array with [longitude, latitude]");
+                return null;
             }
 
             if (node instanceof TextNode) {
@@ -197,10 +203,10 @@ public abstract class GeoPoint implements Serializable {
     }
 
     public static GeoPoint of(final String value) {
-        if(StringUtils.isEmpty(value)) {
+        if (StringUtils.isEmpty(value)) {
             return null;
         }
-        
+
         final double lat;
         final double lon;
 
