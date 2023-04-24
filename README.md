@@ -6,7 +6,8 @@ Utilities for reading and writing JSON and XML using Jackson.
 
 ## Requirements
 
-* Compatible with Java 8+
+* Versions < 4.0.0 require Java 8+
+* Version 4+ require Java 11+
 
 ## Serialization and Deserialization
 
