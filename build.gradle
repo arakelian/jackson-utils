@@ -21,7 +21,7 @@ plugins {
 }
 
 group   = 'com.arakelian'
-version = '4.0.0'
+version = '4.0.1'
 
 
 apply from: "core.gradle"
@@ -57,14 +57,6 @@ publishing.publications.mavenJava {
             url = 'https://github.com/arakelian/jackson-utils.git'
         }
     }
-	pom.withXml {
-		Node pomNode = asNode()
-		pomNode.dependencies.'*'.findAll() {
-		    it.artifactId.text() in [ 'value-annotations', 'guava', 'commons-io', 'commons-lang3' ]
-		}.each() {
-		    it.parent().remove(it)
-		}
-	}
 }
 
 dependencies {
@@ -77,7 +69,7 @@ dependencies {
     errorprone 'com.google.errorprone:error_prone_core:2.18.0'
 
     // use Java 11 compatible versions
-    api 'com.arakelian:more-commons:4.0.0'
+    api 'com.arakelian:more-commons:4.0.1'
 
     // shadow Guava due to frequent downstream incompatibility issues
     api 'com.google.guava:guava:31.1-jre'
@@ -104,5 +96,5 @@ dependencies {
     // for unit testing
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
     testImplementation 'net.javacrumbs.json-unit:json-unit:2.37.0'
-    testImplementation 'com.arakelian:more-commons:4.0.0:tests'
+    testImplementation 'com.arakelian:more-commons:4.0.1:tests'
 }
