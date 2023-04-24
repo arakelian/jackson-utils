@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.deser.impl.NullsConstantProvider;
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
@@ -74,7 +75,7 @@ public class TrimWhitespaceDeserializer extends StdScalarDeserializer<String> {
         if (t == JsonToken.START_ARRAY
                 && context.isEnabled(DeserializationFeature.UNWRAP_SINGLE_VALUE_ARRAYS)) {
             p.nextToken();
-            final String parsed = _parseString(p, context);
+            final String parsed = _parseString(p, context, NullsConstantProvider.nuller());
             if (p.nextToken() != JsonToken.END_ARRAY) {
                 handleMissingEndArrayForSingle(p, context);
             }
