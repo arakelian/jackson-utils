@@ -116,10 +116,12 @@ if(plugins.hasPlugin("com.github.johnrengelman.shadow")) {
 }
 
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact testsJar
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                artifact testsJar
+            }
         }
     }
 }
