@@ -436,7 +436,7 @@ public class JacksonUtilsTest {
         values.clear();
         JacksonUtils.traverse(
                 root,
-                name -> !StringUtils.equals(name, "address"),
+                name -> !"address".equals(name),
                 node -> {
                     // collect values as we traverse
                     values.add(node.asText());

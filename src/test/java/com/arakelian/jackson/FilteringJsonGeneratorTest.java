@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -23,7 +23,6 @@ import com.arakelian.jackson.utils.JacksonUtils;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
@@ -46,7 +45,7 @@ public class FilteringJsonGeneratorTest {
         public Collection<Object[]> data() throws IOException {
             final URL url = FilterParser.class.getResource(resource);
             assertTrue(url != null, "Resource does not exist: " + resource);
-            final String content = Resources.toString(url, Charsets.UTF_8);
+            final String content = Resources.toString(url, StandardCharsets.UTF_8);
 
             final List<Object[]> data = Lists.newArrayList();
 
@@ -123,7 +122,7 @@ public class FilteringJsonGeneratorTest {
 
         private Set<String> split(final String path) {
             final List<String> paths = COMMA_SPLITTER
-                    .splitToList(StringUtils.defaultString(StringUtils.equals(path, "empty") ? null : path));
+                    .splitToList(Objects.toString("empty".equals(path) ? null : path, ""));
             return ImmutableSet.copyOf(paths);
         }
     }

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +141,7 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
     }
 
     private boolean isRoot(final CharSequence path) {
-        return StringUtils.equals(".", path);
+        return ".".contentEquals(path);
     }
 
     private boolean pathStartsWith(
@@ -201,7 +200,7 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
             final StackTraceElement[] trace = Thread.currentThread().getStackTrace();
             for (final StackTraceElement e : trace) {
                 final String m = e.getMethodName();
-                if (StringUtils.startsWith(m, "write")) {
+                if (m.startsWith("write")) {
                     LOGGER.trace("{} {}: {}", getCurrentPath(), m, test);
                     break;
                 }
