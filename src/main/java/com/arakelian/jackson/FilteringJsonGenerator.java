@@ -23,8 +23,6 @@ import com.google.common.collect.ImmutableSet;
 /**
  * Specialized {@link JsonGeneratorDelegate} that allows use of {@link TokenFilter} for outputting a
  * subset of content that caller tries to generate.
- *
- * @since 2.6
  */
 public class FilteringJsonGenerator extends JsonGeneratorDelegate {
     protected static final class Context {
@@ -71,7 +69,7 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
     protected final Set<String> includes;
     protected final Set<String> excludes;
 
-    /** Object names we have traverse **/
+    /** Object names we have traversed **/
     protected final List<Context> contexts = new ArrayList<>();
 
     /** Current field name **/

@@ -32,7 +32,7 @@ public class ZonedDateTimeSerializer extends StdSerializer<ZonedDateTime> {
     }
 
     /**
-     * Serializes the given <code>ZonedDateTime</code> in a format that is readable by commonly use
+     * Serializes the given <code>ZonedDateTime</code> in a format that is readable by commonly used
      * libraries.
      *
      * @see <a href=

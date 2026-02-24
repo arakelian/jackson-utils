@@ -156,14 +156,14 @@ public abstract class GeoPoint implements Serializable {
     private static final double LON_DECODE = 1 / ((0x1L << 32) / 360.0D);
 
     /**
-     * 7 decimal places is worth 1.1 millimiters of accuracy; this is good for charting motions of
+     * 7 decimal places is worth 1.1 millimeters of accuracy; this is good for charting motions of
      * tectonic plates and movements of volcanoes. Permanent, corrected, constantly-running GPS base
      * stations might be able to achieve this level of accuracy
      */
     public static final int DEFAULT_PLACES = 6;
 
     /**
-     * Error margin when comparison latitude and longitude values
+     * Error margin when comparing latitude and longitude values
      */
     public static final double DEFAULT_ERROR = 0.000001d;
 
