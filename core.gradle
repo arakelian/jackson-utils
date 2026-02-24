@@ -32,13 +32,17 @@ test {
 //  JAVA COMPILER
 // -------------------------------------------
 
-tasks.withType(JavaCompile).configureEach {
-    options.release = 21
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
+tasks.withType(JavaCompile).configureEach {
     // always UTF-8
     options.encoding = 'UTF-8'
 
-    // java 8 option which export names of constructor and method parameter names; no longer
+    // export names of constructor and method parameter names; no longer
     // have to declare parameter names with @JsonCreator
     options.compilerArgs << "-parameters"
     
@@ -62,27 +66,6 @@ tasks.withType(JavaCompile).configureEach {
         
         // ignore all generated source folders
         options.errorprone.excludedPaths = '.*generated.*'
-    }
-}
-
-
-// -------------------------------------------
-//  SHADOW JAR
-// -------------------------------------------
-
-if(plugins.hasPlugin("com.github.johnrengelman.shadow")) {
-    jar {
-        archiveClassifier.set('original')
-    }
-    
-    shadowJar {
-        archiveClassifier.set('shadow')
-    }
-
-    sourceSets {
-        // shadow configuration is added by Shadow plugin, but it's only configured for the main sourceset
-        test.compileClasspath += configurations.shadow
-        test.runtimeClasspath += configurations.shadow
     }
 }
 
