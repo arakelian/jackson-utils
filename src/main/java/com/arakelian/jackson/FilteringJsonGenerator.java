@@ -25,17 +25,30 @@ import com.google.common.collect.ImmutableSet;
  * subset of content that caller tries to generate.
  */
 public class FilteringJsonGenerator extends JsonGeneratorDelegate {
+    /** Tracks the current nesting position within JSON output (object or array). */
     protected static final class Context {
         final Type type;
         final String name;
         final Boolean test;
 
+        /**
+         * Constructs a new context for a JSON nesting level.
+         *
+         * @param type  the type of JSON structure (object or array)
+         * @param name  the field name associated with this context, or {@code null} for anonymous entries
+         * @param test  pre-computed filter result, or {@code null} if not yet determined
+         */
         public Context(final Type type, final String name, final Boolean test) {
             this.type = Preconditions.checkNotNull(type);
             this.name = name;
             this.test = test;
         }
 
+        /**
+         * Appends this context's path segment to the given builder.
+         *
+         * @param path the builder to append to
+         */
         public void buildPath(final StringBuilder path) {
             switch (type) {
             case ARRAY:
@@ -56,8 +69,12 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
         }
     }
 
+    /** Enumerates the types of JSON structures that can be nested. */
     protected static enum Type {
-        OBJECT, ARRAY;
+        /** A JSON object structure. */
+        OBJECT,
+        /** A JSON array structure. */
+        ARRAY;
     }
 
     private static final String ARRAY_BRACKETS = "[]";
@@ -66,7 +83,9 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilteringJsonGenerator.class);
 
+    /** Set of JSON paths to include in the output. */
     protected final Set<String> includes;
+    /** Set of JSON paths to exclude from the output. */
     protected final Set<String> excludes;
 
     /** Object names we have traversed **/
@@ -75,6 +94,13 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
     /** Current field name **/
     protected String fieldName;
 
+    /**
+     * Constructs a filtering generator that wraps the given delegate.
+     *
+     * @param delegate the underlying generator to write filtered output to
+     * @param includes set of JSON paths to include, or {@code null} to include all
+     * @param excludes set of JSON paths to exclude, or {@code null} to exclude none
+     */
     public FilteringJsonGenerator(
             final JsonGenerator delegate,
             final Set<String> includes,
@@ -84,10 +110,16 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
         this.excludes = excludes != null ? excludes : ImmutableSet.of();
     }
 
+    /** Called after a value has been written to reset the current field name. */
     protected void afterValue() {
         resetField();
     }
 
+    /**
+     * Returns the dot-separated path representing the current position in the JSON tree.
+     *
+     * @return the current JSON path
+     */
     protected String getCurrentPath() {
         final StringBuilder path = new StringBuilder();
         for (final Context context : contexts) {
@@ -152,10 +184,16 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
         return test ? !excluding : false;
     }
 
+    /** Clears the current field name after it has been processed. */
     protected void resetField() {
         fieldName = null;
     }
 
+    /**
+     * Tests whether the current path should be included in the output, with optional trace logging.
+     *
+     * @return {@code true} if the current path passes the include/exclude filters
+     */
     protected boolean test() {
         final boolean test = test_();
 
@@ -172,6 +210,12 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
         return test;
     }
 
+    /**
+     * Evaluates the include/exclude filters against the current JSON path. Excludes are evaluated
+     * before includes.
+     *
+     * @return {@code true} if the current path should be written to the output
+     */
     protected boolean test_() {
         // have we pre-computed value for this depth?
         final int depth = contexts.size();
@@ -207,6 +251,12 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
         return includes == null || includes.size() == 0;
     }
 
+    /**
+     * Tests and pops the current context when ending a JSON structure.
+     *
+     * @param type the expected type of the ending structure (object or array)
+     * @return {@code true} if the ending structure was being written to the output
+     */
     protected boolean testEnd(final Type type) {
         final int depth = contexts.size();
         Preconditions.checkState(depth != 0, "extra call to writeEndArray or writeEndObject");
@@ -219,6 +269,11 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
         return true;
     }
 
+    /**
+     * Tests the current path and pushes a new array context onto the stack.
+     *
+     * @return {@code true} if the array should be written to the output
+     */
     protected boolean testStartArray() {
         final boolean test = test();
         contexts.add(new Context(Type.ARRAY, fieldName, test ? null : Boolean.FALSE));
@@ -226,6 +281,11 @@ public class FilteringJsonGenerator extends JsonGeneratorDelegate {
         return test;
     }
 
+    /**
+     * Tests the current path and pushes a new object context onto the stack.
+     *
+     * @return {@code true} if the object should be written to the output
+     */
     protected boolean testStartObject() {
         final boolean test = test();
         contexts.add(new Context(Type.OBJECT, fieldName, test ? null : Boolean.FALSE));

@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
  * via {@link DateUtils}.
  */
 public class ZonedDateTimeDeserializer extends StdDeserializer<ZonedDateTime> {
+    /** Constructs a new {@code ZonedDateTimeDeserializer}. */
     public ZonedDateTimeDeserializer() {
         super(ZonedDateTime.class);
     }

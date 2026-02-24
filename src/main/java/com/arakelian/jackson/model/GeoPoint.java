@@ -48,7 +48,23 @@ import com.google.common.base.Preconditions;
 @JsonDeserialize(using = GeoPoint.GeoPointDeserializer.class)
 @JsonPropertyOrder({ "lat", "lon" })
 public abstract class GeoPoint implements Serializable {
+    /**
+     * Protected constructor for subclass use.
+     */
+    protected GeoPoint() {
+    }
+
+    /**
+     * Jackson deserializer for {@link GeoPoint} that supports JSON objects, arrays, and text
+     * (geohash or comma-separated latitude/longitude).
+     */
     public static class GeoPointDeserializer extends JsonDeserializer<GeoPoint> {
+        /**
+         * Constructs a new {@code GeoPointDeserializer}.
+         */
+        public GeoPointDeserializer() {
+        }
+
         @Override
         public GeoPoint deserialize(final JsonParser p, final DeserializationContext ctxt)
                 throws IOException, JsonProcessingException {
@@ -271,6 +287,11 @@ public abstract class GeoPoint implements Serializable {
                 .doubleValue();
     }
 
+    /**
+     * Returns the geohash encoding of this geographic point.
+     *
+     * @return the geohash string
+     */
     @JsonIgnore
     @Value.Lazy
     @Value.Auxiliary
@@ -341,6 +362,12 @@ public abstract class GeoPoint implements Serializable {
      */
     public abstract double getLon();
 
+    /**
+     * Validates that latitude and longitude are within valid ranges and rounds them to the
+     * {@link #DEFAULT_PLACES default number} of decimal places.
+     *
+     * @return a normalized geographic point with rounded coordinates
+     */
     @Value.Check
     protected GeoPoint normalize() {
         // validates latitude is within standard +/-90 coordinate bounds

@@ -41,7 +41,12 @@ import com.google.common.collect.ImmutableMap;
  * values and automatic type conversion via Jackson's {@link ObjectMapper}.
  */
 public abstract class AbstractMapPath implements Serializable {
+    /** Path separator character used to split navigation paths. */
     public static final char PATH_SEPARATOR = '/';
+
+    /** Creates a new instance. */
+    protected AbstractMapPath() {
+    }
 
     /** ObjectMapper that should be used for deserialization. **/
     @SuppressWarnings("immutables")
@@ -129,42 +134,86 @@ public abstract class AbstractMapPath implements Serializable {
         return result;
     }
 
-    /** Returns the first {@link Double} value at the given path, or {@code null} if not found. */
+    /**
+     * Returns the first {@link Double} value at the given path, or {@code null} if not found.
+     *
+     * @param path path to navigate
+     * @return the first Double value, or {@code null}
+     */
     public Double firstDouble(final String path) {
         return firstDouble(path, null);
     }
 
-    /** Returns the first {@link Double} value at the given path, or the default value. */
+    /**
+     * Returns the first {@link Double} value at the given path, or the default value.
+     *
+     * @param path         path to navigate
+     * @param defaultValue value to return when the path cannot be resolved
+     * @return the first Double value, or the default value
+     */
     public Double firstDouble(final String path, final Double defaultValue) {
         return first(path, Double.class, defaultValue);
     }
 
-    /** Returns the first {@link Integer} value at the given path, or {@code null} if not found. */
+    /**
+     * Returns the first {@link Integer} value at the given path, or {@code null} if not found.
+     *
+     * @param path path to navigate
+     * @return the first Integer value, or {@code null}
+     */
     public Integer firstInt(final String path) {
         return firstInt(path, null);
     }
 
-    /** Returns the first {@link Integer} value at the given path, or the default value. */
+    /**
+     * Returns the first {@link Integer} value at the given path, or the default value.
+     *
+     * @param path         path to navigate
+     * @param defaultValue value to return when the path cannot be resolved
+     * @return the first Integer value, or the default value
+     */
     public Integer firstInt(final String path, final Integer defaultValue) {
         return first(path, Integer.class, defaultValue);
     }
 
-    /** Returns the first {@link Long} value at the given path, or {@code null} if not found. */
+    /**
+     * Returns the first {@link Long} value at the given path, or {@code null} if not found.
+     *
+     * @param path path to navigate
+     * @return the first Long value, or {@code null}
+     */
     public Long firstLong(final String path) {
         return firstLong(path, null);
     }
 
-    /** Returns the first {@link Long} value at the given path, or the default value. */
+    /**
+     * Returns the first {@link Long} value at the given path, or the default value.
+     *
+     * @param path         path to navigate
+     * @param defaultValue value to return when the path cannot be resolved
+     * @return the first Long value, or the default value
+     */
     public Long firstLong(final String path, final Long defaultValue) {
         return first(path, Long.class, defaultValue);
     }
 
-    /** Returns the first {@link String} value at the given path, or {@code null} if not found. */
+    /**
+     * Returns the first {@link String} value at the given path, or {@code null} if not found.
+     *
+     * @param path path to navigate
+     * @return the first String value, or {@code null}
+     */
     public String firstString(final String path) {
         return firstString(path, null);
     }
 
-    /** Returns the first {@link String} value at the given path, or the default value. */
+    /**
+     * Returns the first {@link String} value at the given path, or the default value.
+     *
+     * @param path         path to navigate
+     * @param defaultValue value to return when the path cannot be resolved
+     * @return the first String value, or the default value
+     */
     public String firstString(final String path, final String defaultValue) {
         return first(path, String.class, defaultValue);
     }
@@ -198,49 +247,94 @@ public abstract class AbstractMapPath implements Serializable {
         return result;
     }
 
-    /** Returns the {@link Double} value at the given path. */
+    /**
+     * Returns the {@link Double} value at the given path.
+     *
+     * @param path path to navigate
+     * @return the Double value, or {@code null} if not found
+     */
     public Double getDouble(final String path) {
         return get(path, Double.class);
     }
 
-    /** Returns the {@link Float} value at the given path. */
+    /**
+     * Returns the {@link Float} value at the given path.
+     *
+     * @param path path to navigate
+     * @return the Float value, or {@code null} if not found
+     */
     public Float getFloat(final String path) {
         return get(path, Float.class);
     }
 
-    /** Returns the {@link GeoPoint} value at the given path. */
+    /**
+     * Returns the {@link GeoPoint} value at the given path.
+     *
+     * @param path path to navigate
+     * @return the GeoPoint value, or {@code null} if not found
+     */
     public GeoPoint getGeoPoint(final String path) {
         return get(path, GeoPoint.class);
     }
 
-    /** Returns the {@link Integer} value at the given path. */
+    /**
+     * Returns the {@link Integer} value at the given path.
+     *
+     * @param path path to navigate
+     * @return the Integer value, or {@code null} if not found
+     */
     public Integer getInt(final String path) {
         return get(path, Integer.class);
     }
 
-    /** Returns the {@link List} value at the given path. */
+    /**
+     * Returns the {@link List} value at the given path.
+     *
+     * @param <T>  the element type
+     * @param path path to navigate
+     * @return the List value, or {@code null} if not found
+     */
     @SuppressWarnings("unchecked")
     public <T> List<T> getList(final String path) {
         final List list = get(path, List.class);
         return list;
     }
 
-    /** Returns the {@link Long} value at the given path. */
+    /**
+     * Returns the {@link Long} value at the given path.
+     *
+     * @param path path to navigate
+     * @return the Long value, or {@code null} if not found
+     */
     public Long getLong(final String path) {
         return get(path, Long.class);
     }
 
-    /** Returns the {@link Map} value at the given path. */
+    /**
+     * Returns the {@link Map} value at the given path.
+     *
+     * @param path path to navigate
+     * @return the Map value, or {@code null} if not found
+     */
     public Map getMap(final String path) {
         return get(path, Map.class);
     }
 
-    /** Returns the raw {@link Object} value at the given path. */
+    /**
+     * Returns the raw {@link Object} value at the given path.
+     *
+     * @param path path to navigate
+     * @return the value, or {@code null} if not found
+     */
     public Object getObject(final String path) {
         return get(path, Object.class);
     }
 
-    /** Returns the {@link ObjectMapper} used for type conversions. */
+    /**
+     * Returns the {@link ObjectMapper} used for type conversions.
+     *
+     * @return the ObjectMapper instance
+     */
     @JsonIgnore
     @Value.Lazy
     public ObjectMapper getObjectMapper() {
@@ -250,13 +344,26 @@ public abstract class AbstractMapPath implements Serializable {
         return mapper;
     }
 
-    /** Returns the underlying property map. */
+    /**
+     * Returns the underlying property map.
+     *
+     * @return the property map
+     */
     @JsonAnyGetter
     @Value.Default
     public Map<Object, Object> getProperties() {
         return ImmutableMap.of();
     }
 
+    /**
+     * Extracts the next path segment starting at the given index. If an intermediate segment matches
+     * a key in the map, it is returned early to support keys that contain separator characters.
+     *
+     * @param path  the full path string
+     * @param start the index to start extracting from
+     * @param map   the current map used for key lookups
+     * @return the next path segment
+     */
     protected String getSegment(final String path, final int start, final Map map) {
         final int length = path.length();
 
@@ -273,22 +380,41 @@ public abstract class AbstractMapPath implements Serializable {
         return path.substring(start);
     }
 
-    /** Returns the {@link String} value at the given path. */
+    /**
+     * Returns the {@link String} value at the given path.
+     *
+     * @param path path to navigate
+     * @return the String value, or {@code null} if not found
+     */
     public String getString(final String path) {
         return get(path, String.class);
     }
 
-    /** Returns the {@link ZonedDateTime} value at the given path. */
+    /**
+     * Returns the {@link ZonedDateTime} value at the given path.
+     *
+     * @param path path to navigate
+     * @return the ZonedDateTime value, or {@code null} if not found
+     */
     public ZonedDateTime getZonedDateTime(final String path) {
         return get(path, ZonedDateTime.class);
     }
 
-    /** Returns {@code true} if a non-null value exists at the given path. */
+    /**
+     * Returns {@code true} if a non-null value exists at the given path.
+     *
+     * @param path path to navigate
+     * @return {@code true} if a non-null value exists at the path
+     */
     public boolean hasProperty(final String path) {
         return find(path, value -> value != null, false);
     }
 
-    /** Sets the {@link ObjectMapper} to use for type conversions. */
+    /**
+     * Sets the {@link ObjectMapper} to use for type conversions.
+     *
+     * @param mapper the ObjectMapper to use
+     */
     public void setObjectMapper(final ObjectMapper mapper) {
         this.mapper = mapper;
     }

@@ -51,7 +51,23 @@ import com.google.common.base.Splitter;
 @JsonDeserialize(using = Coordinate.CoordinateDeserializer.class)
 @JsonPropertyOrder({ "lat", "lon" })
 public abstract class Coordinate implements Serializable, Comparable<Coordinate> {
+    /**
+     * Constructs a new {@link Coordinate}.
+     */
+    protected Coordinate() {
+    }
+
+    /**
+     * Jackson deserializer for {@link Coordinate} instances. Supports deserialization from
+     * JSON arrays and comma-separated text nodes.
+     */
     public static class CoordinateDeserializer extends JsonDeserializer<Coordinate> {
+        /**
+         * Constructs a new {@link CoordinateDeserializer}.
+         */
+        public CoordinateDeserializer() {
+        }
+
         @Override
         public Coordinate deserialize(final JsonParser p, final DeserializationContext ctxt)
                 throws IOException, JsonProcessingException {
@@ -91,7 +107,17 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
         }
     }
 
+    /**
+     * Jackson serializer for {@link Coordinate} instances. Serializes coordinates as JSON
+     * arrays of two or three elements.
+     */
     public static class CoordinateSerializer extends JsonSerializer<Coordinate> {
+        /**
+         * Constructs a new {@link CoordinateSerializer}.
+         */
+        public CoordinateSerializer() {
+        }
+
         @Override
         public void serialize(
                 final Coordinate value,
@@ -351,6 +377,12 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
         return NULL_ORDINATE;
     }
 
+    /**
+     * Validates that x and y ordinates are not {@link Double#NaN} and rounds all ordinate
+     * values to the {@link #DEFAULT_PLACES default number} of decimal places.
+     *
+     * @return a normalized coordinate with rounded ordinate values
+     */
     @Value.Check
     protected Coordinate normalize() {
         final double x = getX();
