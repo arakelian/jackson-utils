@@ -549,7 +549,7 @@ public abstract class Jackson {
     public abstract Boolean isPretty();
 
     /**
-     * Returns whether the date module for ISO-formatted {@link ZonedDateTime} should be registered.
+     * Returns whether the date module for ISO-formatted ZonedDateTime should be registered.
      *
      * @return {@code true} if the date module should be registered
      */
