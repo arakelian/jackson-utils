@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/**
+ * Jackson utilities for reading and writing JSON with typed accessors and immutable value types.
+ */
 @Value.Style(get = { "is*", "get*" })
 package com.arakelian.jackson;
 

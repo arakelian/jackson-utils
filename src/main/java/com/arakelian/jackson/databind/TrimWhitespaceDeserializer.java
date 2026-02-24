@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 public class TrimWhitespaceDeserializer extends StdScalarDeserializer<String> {
     private static final long serialVersionUID = 1L;
 
+    /** Shared singleton instance. */
     public final static TrimWhitespaceDeserializer SINGLETON = new TrimWhitespaceDeserializer();
 
     private TrimWhitespaceDeserializer() {

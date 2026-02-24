@@ -34,6 +34,11 @@ import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
  * before attempt to convert to Enumeration.
  */
 public final class EnumUppercaseDeserializerModifier extends BeanDeserializerModifier {
+    /** Creates a new {@link EnumUppercaseDeserializerModifier}. */
+    public EnumUppercaseDeserializerModifier() {
+        // default constructor
+    }
+
     @Override
     public JsonDeserializer<Enum> modifyEnumDeserializer(
             final DeserializationConfig config,

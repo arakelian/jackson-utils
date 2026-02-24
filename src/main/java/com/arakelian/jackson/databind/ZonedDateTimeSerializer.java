@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  * common date parsing libraries.
  */
 public class ZonedDateTimeSerializer extends StdSerializer<ZonedDateTime> {
+    /** Constructs a new {@code ZonedDateTimeSerializer}. */
     public ZonedDateTimeSerializer() {
         super(ZonedDateTime.class);
     }

@@ -41,64 +41,140 @@ public class JacksonUtils {
     /** Default ObjectMapper **/
     private static Jackson JACKSON = Jackson.of();
 
-    /** Builds a JSON string from the given key-value pairs. */
+    /**
+     * Builds a JSON string from the given key-value pairs.
+     *
+     * @param keyValues alternating keys and values
+     * @return a JSON string representation of the key-value pairs
+     */
     public static CharSequence buildJson(final Object... keyValues) {
         return JACKSON.buildJson(keyValues);
     }
 
-    /** Builds a {@link JsonNode} from the given key-value pairs. */
+    /**
+     * Builds a {@link JsonNode} from the given key-value pairs.
+     *
+     * @param keyValues alternating keys and values
+     * @return a {@link JsonNode} representation of the key-value pairs
+     */
     public static JsonNode buildJsonNode(final Object... keyValues) {
         return JACKSON.buildJsonNode(keyValues);
     }
 
-    /** Converts the given value to the specified type using Jackson data binding. */
+    /**
+     * Converts the given value to the specified type using Jackson data binding.
+     *
+     * @param <T> the target type
+     * @param value the value to convert
+     * @param type the target class
+     * @return the converted value
+     */
     public static <T> T convertValue(final Object value, final Class<T> type) {
         return JACKSON.convertValue(value, type);
     }
 
-    /** Converts the given value to a {@code Map<String, Object>}. */
+    /**
+     * Converts the given value to a {@code Map<String, Object>}.
+     *
+     * @param value the value to convert
+     * @return the value as a map
+     */
     public static Map<String, Object> convertValueToMap(final Object value) {
         return JACKSON.convertValueToMap(value);
     }
 
-    /** Returns the default {@link ObjectMapper}. */
+    /**
+     * Returns the default {@link ObjectMapper}.
+     *
+     * @return a copy of the default {@link ObjectMapper}
+     */
     public static ObjectMapper getObjectMapper() {
         // always return copy because ObjectMapper is mutable
         return JACKSON.getObjectMapper();
     }
 
-    /** Returns an {@link ObjectWriter} with the specified pretty printing option. */
+    /**
+     * Returns an {@link ObjectWriter} with the specified pretty printing option.
+     *
+     * @param pretty {@code true} to enable pretty printing
+     * @return an {@link ObjectWriter} instance
+     */
     public static ObjectWriter getObjectWriter(final boolean pretty) {
         return JACKSON.getObjectWriter(JACKSON.getView(), pretty);
     }
 
-    /** Returns an {@link ObjectWriter} configured with the given JSON view. */
+    /**
+     * Returns an {@link ObjectWriter} configured with the given JSON view.
+     *
+     * @param view the JSON view class
+     * @return an {@link ObjectWriter} instance
+     */
     public static ObjectWriter getObjectWriter(final Class<?> view) {
         return JACKSON.getObjectWriter(view, false);
     }
 
-    /** Returns an {@link ObjectWriter} configured with the given JSON view and pretty printing option. */
+    /**
+     * Returns an {@link ObjectWriter} configured with the given JSON view and pretty printing option.
+     *
+     * @param view the JSON view class
+     * @param pretty {@code true} to enable pretty printing
+     * @return an {@link ObjectWriter} instance
+     */
     public static ObjectWriter getObjectWriter(final Class<?> view, final boolean pretty) {
         return JACKSON.getObjectWriter(view, pretty);
     }
 
-    /** Deserializes the given JSON string into an instance of the specified class. */
+    /**
+     * Deserializes the given JSON string into an instance of the specified class.
+     *
+     * @param <T> the target type
+     * @param json the JSON string to deserialize
+     * @param valueType the target class
+     * @return the deserialized value
+     * @throws IOException if the JSON cannot be parsed
+     */
     public static <T> T readValue(final String json, final Class<T> valueType) throws IOException {
         return JACKSON.readValue(json, valueType);
     }
 
-    /** Deserializes the given JSON string into an instance of the specified {@link JavaType}. */
+    /**
+     * Deserializes the given JSON string into an instance of the specified {@link JavaType}.
+     *
+     * @param <T> the target type
+     * @param json the JSON string to deserialize
+     * @param valueType the target {@link JavaType}
+     * @return the deserialized value
+     * @throws IOException if the JSON cannot be parsed
+     */
     @SuppressWarnings("TypeParameterUnusedInFormals")
     public static <T> T readValue(final String json, final JavaType valueType) throws IOException {
         return JACKSON.readValue(json, valueType);
     }
 
-    /** Deserializes the given JSON string into an instance of the specified {@link TypeReference}. */
+    /**
+     * Deserializes the given JSON string into an instance of the specified {@link TypeReference}.
+     *
+     * @param <T> the target type
+     * @param json the JSON string to deserialize
+     * @param valueType the target {@link TypeReference}
+     * @return the deserialized value
+     * @throws IOException if the JSON cannot be parsed
+     */
     public static <T> T readValue(final String json, final TypeReference<T> valueType) throws IOException {
         return JACKSON.readValue(json, valueType);
     }
 
-    /** Deserializes the given JSON string into a map with the specified key and value types. */
+    /**
+     * Deserializes the given JSON string into a map with the specified key and value types.
+     *
+     * @param <K> the map key type
+     * @param <V> the map value type
+     * @param json the JSON string to deserialize
+     * @param keyType the class of the map keys
+     * @param valueType the class of the map values
+     * @return the deserialized map
+     * @throws IOException if the JSON cannot be parsed
+     */
     public static <K, V> Map<K, V> readValueAsMap(
             final String json,
             final Class<K> keyType,
@@ -106,29 +182,63 @@ public class JacksonUtils {
         return JACKSON.readValueAsMap(json, keyType, valueType);
     }
 
-    /** Generates JSON content via the callback and returns it as a {@link CharSequence}. */
+    /**
+     * Generates JSON content via the callback and returns it as a {@link CharSequence}.
+     *
+     * @param pretty {@code true} to enable pretty printing
+     * @param callback the callback that writes JSON content
+     * @return the generated JSON as a {@link CharSequence}
+     * @throws UncheckedIOException if an I/O error occurs during generation
+     */
     public static CharSequence toCharSequence(final boolean pretty, final JsonGeneratorCallback callback)
             throws UncheckedIOException {
         return JACKSON.toCharSequence(pretty, callback);
     }
 
-    /** Generates JSON content via the callback and returns it as a {@link String}. */
+    /**
+     * Generates JSON content via the callback and returns it as a {@link String}.
+     *
+     * @param pretty {@code true} to enable pretty printing
+     * @param callback the callback that writes JSON content
+     * @return the generated JSON as a {@link String}
+     * @throws UncheckedIOException if an I/O error occurs during generation
+     */
     public static String toString(final boolean pretty, final JsonGeneratorCallback callback)
             throws UncheckedIOException {
         return Objects.toString(JACKSON.toCharSequence(pretty, callback), null);
     }
 
-    /** Serializes the given value to a JSON string, optionally with pretty printing. */
+    /**
+     * Serializes the given value to a JSON string, optionally with pretty printing.
+     *
+     * @param value the value to serialize
+     * @param pretty {@code true} to enable pretty printing
+     * @return the JSON string representation
+     * @throws UncheckedIOException if a serialization error occurs
+     */
     public static String toString(final Object value, final boolean pretty) throws UncheckedIOException {
         return JACKSON.toString(value, pretty);
     }
 
-    /** Serializes the given value to a JSON string, suppressing serialization errors. */
+    /**
+     * Serializes the given value to a JSON string, suppressing serialization errors.
+     *
+     * @param value the value to serialize
+     * @param pretty {@code true} to enable pretty printing
+     * @return the JSON string representation
+     * @throws UncheckedIOException if a serialization error occurs
+     */
     public static String toStringSafe(final Object value, final boolean pretty) throws UncheckedIOException {
         return JACKSON.toString(value, pretty);
     }
 
-    /** Recursively traverses a {@link JsonNode} tree, invoking the consumer on matching leaf nodes. */
+    /**
+     * Recursively traverses a {@link JsonNode} tree, invoking the consumer on matching leaf nodes.
+     *
+     * @param node the root node to traverse
+     * @param fieldPredicate a predicate to filter object field names, or {@code null} to accept all
+     * @param consumer the consumer invoked on each matching leaf node
+     */
     public static void traverse(
             final JsonNode node,
             final Predicate<String> fieldPredicate,
@@ -162,7 +272,13 @@ public class JacksonUtils {
         }
     }
 
-    /** Returns a new {@link ObjectMapper} configured with the specified JSON view. */
+    /**
+     * Returns a new {@link ObjectMapper} configured with the specified JSON view.
+     *
+     * @param mapper the source {@link ObjectMapper}
+     * @param view the JSON view class
+     * @return a new {@link ObjectMapper} configured with the given view
+     */
     public static ObjectMapper withView(final ObjectMapper mapper, final Class<?> view) {
         return Jackson.from(mapper) //
                 .view(view) //

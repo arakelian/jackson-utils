@@ -41,10 +41,15 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonSerialize(using = MapPathSerializer.class, as = ImmutableMapPath.class)
 @JsonDeserialize(builder = ImmutableMapPath.Builder.class)
 public abstract class MapPath extends AbstractMapPath {
+    /** Protected constructor for subclass use. */
+    protected MapPath() {
+    }
+
     /**
-     * Customize serializer that prevents 'empty' MapPath objects from being serialized
+     * Serializer that prevents empty {@link MapPath} objects from being serialized.
      */
     public static class MapPathSerializer extends StdSerializer<MapPath> {
+        /** Constructs a new {@code MapPathSerializer}. */
         public MapPathSerializer() {
             super(MapPath.class);
         }
@@ -67,7 +72,11 @@ public abstract class MapPath extends AbstractMapPath {
         static final MapPath INSTANCE = ImmutableMapPath.builder().build();
     }
 
-    /** Returns an empty {@link MapPath} with no properties. */
+    /**
+     * Returns an empty {@link MapPath} with no properties.
+     *
+     * @return an empty MapPath
+     */
     public static MapPath of() {
         return EmptyHolder.INSTANCE;
     }

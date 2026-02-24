@@ -82,7 +82,17 @@ public abstract class Jackson {
     private static final ObjectMapper DEFAULT_OBJECT_MAPPER = defaultBuilder().build() //
             .getObjectMapper();
 
-    /** Returns a builder pre-configured with sensible defaults for Jackson serialization and deserialization. */
+    /**
+     * Protected constructor to prevent direct instantiation.
+     */
+    protected Jackson() {
+    }
+
+    /**
+     * Returns a builder pre-configured with sensible defaults for Jackson serialization and deserialization.
+     *
+     * @return a pre-configured builder
+     */
     @SuppressWarnings(value = { "deprecation", "immutables:incompat" })
     public static ImmutableJackson.Builder defaultBuilder() {
         return ImmutableJackson.builder() //
@@ -126,27 +136,50 @@ public abstract class Jackson {
         ;
     }
 
-    /** Returns a builder that wraps the given {@link ObjectMapper} as its default mapper. */
+    /**
+     * Returns a builder that wraps the given {@link ObjectMapper} as its default mapper.
+     *
+     * @param mapper the {@link ObjectMapper} to wrap
+     * @return a builder initialized with the given mapper
+     */
     public static ImmutableJackson.Builder from(final ObjectMapper mapper) {
         return ImmutableJackson.builder().defaultMapper(mapper);
     }
 
-    /** Returns a builder that wraps the default {@link ObjectMapper}. */
+    /**
+     * Returns a builder that wraps the default {@link ObjectMapper}.
+     *
+     * @return a builder initialized with the default mapper
+     */
     public static ImmutableJackson.Builder fromDefault() {
         return from(DEFAULT_OBJECT_MAPPER);
     }
 
-    /** Creates a {@link Jackson} instance with the default configuration. */
+    /**
+     * Creates a {@link Jackson} instance with the default configuration.
+     *
+     * @return a new {@link Jackson} instance with defaults
+     */
     public static Jackson of() {
         return fromDefault().build();
     }
 
-    /** Creates a {@link Jackson} instance that wraps the given {@link ObjectMapper}. */
+    /**
+     * Creates a {@link Jackson} instance that wraps the given {@link ObjectMapper}.
+     *
+     * @param mapper the {@link ObjectMapper} to use
+     * @return a new {@link Jackson} instance wrapping the given mapper
+     */
     public static Jackson of(final ObjectMapper mapper) {
         return from(mapper).build();
     }
 
-    /** Builds a JSON string from the given key-value pairs. */
+    /**
+     * Builds a JSON string from the given key-value pairs.
+     *
+     * @param keyValues alternating keys and values
+     * @return the serialized JSON string
+     */
     public CharSequence buildJson(final Object... keyValues) {
         final int length = keyValues.length;
         Preconditions.checkArgument(
@@ -169,7 +202,12 @@ public abstract class Jackson {
         });
     }
 
-    /** Builds a {@link JsonNode} from the given key-value pairs. */
+    /**
+     * Builds a {@link JsonNode} from the given key-value pairs.
+     *
+     * @param keyValues alternating keys and values
+     * @return the parsed {@link JsonNode}
+     */
     public JsonNode buildJsonNode(final Object... keyValues) {
         final CharSequence json = buildJson(keyValues);
         try {
@@ -180,17 +218,38 @@ public abstract class Jackson {
         }
     }
 
-    /** Converts the given value to the specified type using Jackson data binding. */
+    /**
+     * Converts the given value to the specified type using Jackson data binding.
+     *
+     * @param <T> the target type
+     * @param value the value to convert
+     * @param valueType the target class
+     * @return the converted value
+     */
     public <T> T convertValue(final Object value, final Class<T> valueType) {
         return getObjectMapper().convertValue(value, valueType);
     }
 
-    /** Converts the given value to a {@code Map<String, Object>}. */
+    /**
+     * Converts the given value to a {@code Map<String, Object>}.
+     *
+     * @param value the value to convert
+     * @return a map representation of the value
+     */
     public Map<String, Object> convertValueToMap(final Object value) {
         return convertValueToMap(value, String.class, Object.class);
     }
 
-    /** Converts the given value to a map with the specified key and value types. */
+    /**
+     * Converts the given value to a map with the specified key and value types.
+     *
+     * @param <K> the map key type
+     * @param <V> the map value type
+     * @param value the value to convert
+     * @param keyType the class of the map keys
+     * @param valueType the class of the map values
+     * @return a map representation of the value
+     */
     public <K, V> Map<K, V> convertValueToMap(
             final Object value,
             final Class<K> keyType,
@@ -199,7 +258,14 @@ public abstract class Jackson {
         return getObjectMapper().convertValue(value, type);
     }
 
-    /** Creates a {@link JsonGenerator} that writes to the given writer, optionally with pretty printing. */
+    /**
+     * Creates a {@link JsonGenerator} that writes to the given writer, optionally with pretty printing.
+     *
+     * @param writer the writer to output JSON content to
+     * @param pretty whether to enable pretty printing
+     * @return a configured {@link JsonGenerator}
+     * @throws IOException if the generator cannot be created
+     */
     public JsonGenerator createGenerator(final Writer writer, final boolean pretty) throws IOException {
         final JsonGenerator generator = getObjectMapper().getFactory().createGenerator(writer);
         if (pretty) {
@@ -233,27 +299,60 @@ public abstract class Jackson {
         return super.equals(obj);
     }
 
-    /** Returns a new builder initialized from this instance's {@link ObjectMapper}. */
+    /**
+     * Returns a new builder initialized from this instance's {@link ObjectMapper}.
+     *
+     * @return a builder initialized with this instance's mapper
+     */
     public ImmutableJackson.Builder from() {
         return from(getObjectMapper());
     }
 
+    /**
+     * Returns the default {@link ObjectMapper} to use as a base, or {@code null} if none.
+     *
+     * @return the default mapper, or {@code null}
+     */
     @Nullable
     @Value.Auxiliary
     public abstract ObjectMapper getDefaultMapper();
 
+    /**
+     * Returns the map of deserialization features and their enabled/disabled state.
+     *
+     * @return the deserialization feature map
+     */
     @Value.Auxiliary
     public abstract Map<DeserializationFeature, Boolean> getDeserializationFeatures();
 
+    /**
+     * Returns the map of generator features and their enabled/disabled state.
+     *
+     * @return the generator feature map
+     */
     @Value.Auxiliary
     public abstract Map<Feature, Boolean> getGeneratorFeatures();
 
+    /**
+     * Returns the locale to use for the {@link ObjectMapper}, or {@code null} for the default.
+     *
+     * @return the locale, or {@code null}
+     */
     @Nullable
     public abstract Locale getLocale();
 
+    /**
+     * Returns the map of mapper features and their enabled/disabled state.
+     *
+     * @return the mapper feature map
+     */
     public abstract Map<MapperFeature, Boolean> getMapperFeatures();
 
-    /** Returns the set of Jackson modules to register, based on the current configuration flags. */
+    /**
+     * Returns the set of Jackson modules to register, based on the current configuration flags.
+     *
+     * @return the set of modules
+     */
     @Value.Default
     public Set<Module> getModules() {
         final ImmutableSet.Builder<Module> modules = ImmutableSet.<Module> builder();
@@ -269,7 +368,11 @@ public abstract class Jackson {
         return modules.build();
     }
 
-    /** Returns a fully configured {@link ObjectMapper} built from this instance's settings. */
+    /**
+     * Returns a fully configured {@link ObjectMapper} built from this instance's settings.
+     *
+     * @return the configured {@link ObjectMapper}
+     */
     @SuppressWarnings("deprecation")
     @Value.Lazy
     public ObjectMapper getObjectMapper() {
@@ -343,13 +446,23 @@ public abstract class Jackson {
         return mapper;
     }
 
-    /** Returns a lazily-created {@link ObjectWriter} without pretty printing. */
+    /**
+     * Returns a lazily-created {@link ObjectWriter} without pretty printing.
+     *
+     * @return the {@link ObjectWriter}
+     */
     @Value.Lazy
     public ObjectWriter getObjectWriter() {
         return createObjectWriter(getView(), false);
     }
 
-    /** Returns an {@link ObjectWriter} configured with the given view and pretty printing option. */
+    /**
+     * Returns an {@link ObjectWriter} configured with the given view and pretty printing option.
+     *
+     * @param view the serialization view class, or {@code null} for no view
+     * @param pretty whether to enable pretty printing
+     * @return the configured {@link ObjectWriter}
+     */
     public ObjectWriter getObjectWriter(final Class<?> view, final boolean pretty) {
         if (view == getView()) {
             if (pretty) {
@@ -361,19 +474,43 @@ public abstract class Jackson {
         return createObjectWriter(view, pretty);
     }
 
-    /** Returns a lazily-created {@link ObjectWriter} with pretty printing enabled. */
+    /**
+     * Returns a lazily-created {@link ObjectWriter} with pretty printing enabled.
+     *
+     * @return the pretty-printing {@link ObjectWriter}
+     */
     @Value.Lazy
     public ObjectWriter getObjectWriterWithPrettyPrinter() {
         return createObjectWriter(getView(), true);
     }
 
+    /**
+     * Returns the map of parser features and their enabled/disabled state.
+     *
+     * @return the parser feature map
+     */
     public abstract Map<JsonParser.Feature, Boolean> getParserFeatures();
 
+    /**
+     * Returns the map of serialization features and their enabled/disabled state.
+     *
+     * @return the serialization feature map
+     */
     public abstract Map<SerializationFeature, Boolean> getSerializationFeatures();
 
+    /**
+     * Returns the serialization inclusion rule, or {@code null} for the default.
+     *
+     * @return the serialization inclusion, or {@code null}
+     */
     @Nullable
     public abstract JsonInclude.Include getSerializationInclusion();
 
+    /**
+     * Returns the JSON view class used for serialization and deserialization, or {@code null} for none.
+     *
+     * @return the view class, or {@code null}
+     */
     @Nullable
     public abstract Class<?> getView();
 
@@ -383,35 +520,74 @@ public abstract class Jackson {
         return super.hashCode();
     }
 
+    /**
+     * Returns whether properties without a view annotation are included in serialization.
+     *
+     * @return {@code true} if default view inclusion is enabled
+     */
     @Value.Default
     public boolean isDefaultViewInclusion() {
         return true;
     }
 
+    /**
+     * Returns whether Jackson should automatically find and register modules via the ServiceLoader.
+     *
+     * @return {@code true} if modules should be auto-discovered
+     */
     @Value.Default
     public boolean isFindAndRegisterModules() {
         return false;
     }
 
+    /**
+     * Returns whether pretty printing is enabled, or {@code null} if not specified.
+     *
+     * @return {@code true} if pretty printing is enabled, {@code false} if disabled, or {@code null}
+     */
     @Nullable
     public abstract Boolean isPretty();
 
+    /**
+     * Returns whether the date module for ISO-formatted {@link ZonedDateTime} should be registered.
+     *
+     * @return {@code true} if the date module should be registered
+     */
     @Value.Default
     public boolean isRegisterDateModule() {
         return true;
     }
 
+    /**
+     * Returns whether the enum module for case-insensitive deserialization should be registered.
+     *
+     * @return {@code true} if the enum module should be registered
+     */
     @Value.Default
     public boolean isRegisterEnumModule() {
         return true;
     }
 
+    /**
+     * Returns whether the trim module for stripping leading and trailing whitespace should be registered.
+     *
+     * @return {@code true} if the trim module should be registered
+     */
     @Value.Default
     public boolean isRegisterTrimModule() {
         return true;
     }
 
-    /** Constructs a {@link MapType} for the given map class, key type, and value type. */
+    /**
+     * Constructs a {@link MapType} for the given map class, key type, and value type.
+     *
+     * @param <K> the map key type
+     * @param <V> the map value type
+     * @param mapClass the map implementation class
+     * @param keyType the class of the map keys
+     * @param valueType the class of the map values
+     * @return the constructed {@link MapType}
+     */
     public <K, V> MapType mapType(
             final Class<? extends Map> mapClass,
             final Class<K> keyType,
@@ -423,28 +599,70 @@ public abstract class Jackson {
         return type;
     }
 
-    /** Reads a value of the given type from the specified {@link Reader}. */
+    /**
+     * Reads a value of the given type from the specified {@link Reader}.
+     *
+     * @param <T> the target type
+     * @param src the reader to read JSON content from
+     * @param valueType the target class
+     * @return the deserialized value
+     * @throws IOException if reading or deserialization fails
+     */
     public <T> T readValue(final Reader src, final Class<T> valueType) throws IOException {
         return getObjectMapper().readValue(src, valueType);
     }
 
-    /** Deserializes the given JSON string into an instance of the specified class. */
+    /**
+     * Deserializes the given JSON string into an instance of the specified class.
+     *
+     * @param <T> the target type
+     * @param json the JSON string to deserialize
+     * @param type the target class
+     * @return the deserialized value, or {@code null} if the input is empty
+     * @throws IOException if deserialization fails
+     */
     public <T> T readValue(final String json, final Class<T> type) throws IOException {
         return StringUtils.isEmpty(json) ? null : getObjectMapper().readValue(json, type);
     }
 
-    /** Deserializes the given JSON string into an instance of the specified {@link JavaType}. */
+    /**
+     * Deserializes the given JSON string into an instance of the specified {@link JavaType}.
+     *
+     * @param <T> the target type
+     * @param json the JSON string to deserialize
+     * @param valueType the target {@link JavaType}
+     * @return the deserialized value, or {@code null} if the input is empty
+     * @throws IOException if deserialization fails
+     */
     @SuppressWarnings("TypeParameterUnusedInFormals")
     public <T> T readValue(final String json, final JavaType valueType) throws IOException {
         return StringUtils.isEmpty(json) ? null : getObjectMapper().readValue(json, valueType);
     }
 
-    /** Deserializes the given JSON string into an instance of the specified {@link TypeReference}. */
+    /**
+     * Deserializes the given JSON string into an instance of the specified {@link TypeReference}.
+     *
+     * @param <T> the target type
+     * @param json the JSON string to deserialize
+     * @param valueType the target {@link TypeReference}
+     * @return the deserialized value, or {@code null} if the input is empty
+     * @throws IOException if deserialization fails
+     */
     public <T> T readValue(final String json, final TypeReference<T> valueType) throws IOException {
         return StringUtils.isEmpty(json) ? null : getObjectMapper().readValue(json, valueType);
     }
 
-    /** Deserializes the given JSON string into a map with the specified key and value types. */
+    /**
+     * Deserializes the given JSON string into a map with the specified key and value types.
+     *
+     * @param <K> the map key type
+     * @param <V> the map value type
+     * @param json the JSON string to deserialize
+     * @param keyType the class of the map keys
+     * @param valueType the class of the map values
+     * @return the deserialized map, or an empty map if the input is empty
+     * @throws IOException if deserialization fails
+     */
     public <K, V> Map<K, V> readValueAsMap(
             final String json,
             final Class<K> keyType,
@@ -457,7 +675,14 @@ public abstract class Jackson {
         return getObjectMapper().readValue(json, type);
     }
 
-    /** Generates JSON content via the callback and returns it as a {@link CharSequence}. */
+    /**
+     * Generates JSON content via the callback and returns it as a {@link CharSequence}.
+     *
+     * @param pretty whether to enable pretty printing
+     * @param callback the callback that writes JSON content to a generator
+     * @return the generated JSON as a {@link CharSequence}
+     * @throws UncheckedIOException if an I/O error occurs during generation
+     */
     public CharSequence toCharSequence(final boolean pretty, final JsonGeneratorCallback callback)
             throws UncheckedIOException {
         final StringWriter out = new StringWriter(128);
@@ -471,12 +696,23 @@ public abstract class Jackson {
         return out.getBuffer();
     }
 
-    /** Generates pretty-printed JSON content via the callback and returns it as a {@link CharSequence}. */
+    /**
+     * Generates pretty-printed JSON content via the callback and returns it as a {@link CharSequence}.
+     *
+     * @param callback the callback that writes JSON content to a generator
+     * @return the generated JSON as a {@link CharSequence}
+     */
     public CharSequence toCharSequence(final JsonGeneratorCallback callback) {
         return toCharSequence(true, callback);
     }
 
-    /** Serializes the given value to a JSON string using the configured {@link ObjectMapper}. */
+    /**
+     * Serializes the given value to a JSON string using the configured {@link ObjectMapper}.
+     *
+     * @param value the value to serialize
+     * @return the JSON string, or an empty string if the value is {@code null}
+     * @throws UncheckedIOException if serialization fails
+     */
     public String toString(final Object value) throws UncheckedIOException {
         if (value == null) {
             return StringUtils.EMPTY;
@@ -488,7 +724,14 @@ public abstract class Jackson {
         }
     }
 
-    /** Serializes the given value to a JSON string, optionally with pretty printing. */
+    /**
+     * Serializes the given value to a JSON string, optionally with pretty printing.
+     *
+     * @param value the value to serialize
+     * @param pretty whether to enable pretty printing
+     * @return the JSON string, or an empty string if the value is {@code null}
+     * @throws UncheckedIOException if serialization fails
+     */
     public String toString(final Object value, final boolean pretty) throws UncheckedIOException {
         if (value == null) {
             return StringUtils.EMPTY;
