@@ -1,7 +1,5 @@
 // jackson-utils
 
-import com.vanniktech.maven.publish.SonatypeHost
-
 plugins {
     id 'java-library'
     id 'eclipse'
@@ -11,14 +9,14 @@ plugins {
     id 'com.github.ben-manes.versions' version '0.53.0'
 
     // to ensure clean code
-    id "net.ltgt.errorprone" version "4.4.0"
+    id "net.ltgt.errorprone" version "5.0.0"
 
     // for deployment to Maven Central
-    id "com.vanniktech.maven.publish" version "0.30.0"
+    id "com.vanniktech.maven.publish" version "0.36.0"
 }
 
 group   = 'com.arakelian'
-version = '5.0.0'
+version = '5.1.0'
 
 
 apply from: "core.gradle"
@@ -28,7 +26,7 @@ wrapper {
 }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
     signAllPublications()
 
     pom {
@@ -96,6 +94,6 @@ dependencies {
     // for unit testing
     testImplementation 'org.junit.jupiter:junit-jupiter:5.14.3'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testImplementation 'net.javacrumbs.json-unit:json-unit:4.1.1'
+    testImplementation 'net.javacrumbs.json-unit:json-unit:5.1.0'
     testImplementation 'com.arakelian:more-commons:5.1.0:test-fixtures'
 }
