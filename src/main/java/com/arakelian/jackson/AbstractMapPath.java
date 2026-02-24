@@ -35,6 +35,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
+/**
+ * Base class for navigating nested {@link Map} structures using slash-separated or dot-separated
+ * paths. Provides typed accessors for retrieving values at a given path, with support for default
+ * values and automatic type conversion via Jackson's {@link ObjectMapper}.
+ */
 public abstract class AbstractMapPath implements Serializable {
     public static final char PATH_SEPARATOR = '/';
 
@@ -42,6 +47,16 @@ public abstract class AbstractMapPath implements Serializable {
     @SuppressWarnings("immutables")
     private transient ObjectMapper mapper;
 
+    /**
+     * Traverses the property map along the given path and applies the function to the value found
+     * at the terminal segment.
+     *
+     * @param <R>          the return type
+     * @param path         slash or dot separated path to navigate
+     * @param function     function to apply to the resolved value
+     * @param defaultValue value to return when the path cannot be resolved
+     * @return the result of applying the function, or the default value
+     */
     public <R> R find(final String path, final Function<Object, R> function, final R defaultValue) {
         if (getProperties().size() == 0 || StringUtils.isEmpty(path)) {
             return defaultValue;
@@ -74,10 +89,29 @@ public abstract class AbstractMapPath implements Serializable {
         return defaultValue;
     }
 
+    /**
+     * Returns the first element at the given path, converted to the specified type. If the value is
+     * a collection, the first element is returned.
+     *
+     * @param <T>   the target type
+     * @param path  path to navigate
+     * @param clazz target type class
+     * @return the converted value, or {@code null} if not found
+     */
     public <T> T first(final String path, final Class<T> clazz) {
         return first(path, clazz, null);
     }
 
+    /**
+     * Returns the first element at the given path, converted to the specified type, or the default
+     * value if not found.
+     *
+     * @param <T>          the target type
+     * @param path         path to navigate
+     * @param clazz        target type class
+     * @param defaultValue value to return when the path cannot be resolved
+     * @return the converted value, or the default value
+     */
     public <T> T first(final String path, final Class<T> clazz, final T defaultValue) {
         Preconditions.checkArgument(clazz != null, "clazz must be non-null");
         final T result = find(path, value -> {
@@ -96,42 +130,67 @@ public abstract class AbstractMapPath implements Serializable {
         return result;
     }
 
+    /** Returns the first {@link Double} value at the given path, or {@code null} if not found. */
     public Double firstDouble(final String path) {
         return firstDouble(path, null);
     }
 
+    /** Returns the first {@link Double} value at the given path, or the default value. */
     public Double firstDouble(final String path, final Double defaultValue) {
         return first(path, Double.class, defaultValue);
     }
 
+    /** Returns the first {@link Integer} value at the given path, or {@code null} if not found. */
     public Integer firstInt(final String path) {
         return firstInt(path, null);
     }
 
+    /** Returns the first {@link Integer} value at the given path, or the default value. */
     public Integer firstInt(final String path, final Integer defaultValue) {
         return first(path, Integer.class, defaultValue);
     }
 
+    /** Returns the first {@link Long} value at the given path, or {@code null} if not found. */
     public Long firstLong(final String path) {
         return firstLong(path, null);
     }
 
+    /** Returns the first {@link Long} value at the given path, or the default value. */
     public Long firstLong(final String path, final Long defaultValue) {
         return first(path, Long.class, defaultValue);
     }
 
+    /** Returns the first {@link String} value at the given path, or {@code null} if not found. */
     public String firstString(final String path) {
         return firstString(path, null);
     }
 
+    /** Returns the first {@link String} value at the given path, or the default value. */
     public String firstString(final String path, final String defaultValue) {
         return first(path, String.class, defaultValue);
     }
 
+    /**
+     * Returns the value at the given path, converted to the specified type.
+     *
+     * @param <T>   the target type
+     * @param path  path to navigate
+     * @param clazz target type class
+     * @return the converted value, or {@code null} if not found
+     */
     public <T> T get(final String path, final Class<T> clazz) {
         return get(path, clazz, null);
     }
 
+    /**
+     * Returns the value at the given path, converted to the specified type, or the default value.
+     *
+     * @param <T>          the target type
+     * @param path         path to navigate
+     * @param clazz        target type class
+     * @param defaultValue value to return when the path cannot be resolved
+     * @return the converted value, or the default value
+     */
     public <T> T get(final String path, final Class<T> clazz, final T defaultValue) {
         Preconditions.checkArgument(clazz != null, "clazz must be non-null");
         final T result = find(path, value -> {
@@ -140,40 +199,49 @@ public abstract class AbstractMapPath implements Serializable {
         return result;
     }
 
+    /** Returns the {@link Double} value at the given path. */
     public Double getDouble(final String path) {
         return get(path, Double.class);
     }
 
+    /** Returns the {@link Float} value at the given path. */
     public Float getFloat(final String path) {
         return get(path, Float.class);
     }
 
+    /** Returns the {@link GeoPoint} value at the given path. */
     public GeoPoint getGeoPoint(final String path) {
         return get(path, GeoPoint.class);
     }
 
+    /** Returns the {@link Integer} value at the given path. */
     public Integer getInt(final String path) {
         return get(path, Integer.class);
     }
 
+    /** Returns the {@link List} value at the given path. */
     @SuppressWarnings("unchecked")
     public <T> List<T> getList(final String path) {
         final List list = get(path, List.class);
         return list;
     }
 
+    /** Returns the {@link Long} value at the given path. */
     public Long getLong(final String path) {
         return get(path, Long.class);
     }
 
+    /** Returns the {@link Map} value at the given path. */
     public Map getMap(final String path) {
         return get(path, Map.class);
     }
 
+    /** Returns the raw {@link Object} value at the given path. */
     public Object getObject(final String path) {
         return get(path, Object.class);
     }
 
+    /** Returns the {@link ObjectMapper} used for type conversions. */
     @JsonIgnore
     @Value.Lazy
     public ObjectMapper getObjectMapper() {
@@ -183,6 +251,7 @@ public abstract class AbstractMapPath implements Serializable {
         return mapper;
     }
 
+    /** Returns the underlying property map. */
     @JsonAnyGetter
     @Value.Default
     public Map<Object, Object> getProperties() {
@@ -205,18 +274,22 @@ public abstract class AbstractMapPath implements Serializable {
         return path.substring(start);
     }
 
+    /** Returns the {@link String} value at the given path. */
     public String getString(final String path) {
         return get(path, String.class);
     }
 
+    /** Returns the {@link ZonedDateTime} value at the given path. */
     public ZonedDateTime getZonedDateTime(final String path) {
         return get(path, ZonedDateTime.class);
     }
 
+    /** Returns {@code true} if a non-null value exists at the given path. */
     public boolean hasProperty(final String path) {
         return find(path, value -> value != null, false);
     }
 
+    /** Sets the {@link ObjectMapper} to use for type conversions. */
     public void setObjectMapper(final ObjectMapper mapper) {
         this.mapper = mapper;
     }

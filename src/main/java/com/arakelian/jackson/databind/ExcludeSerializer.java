@@ -28,11 +28,24 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
+/**
+ * A {@link JsonSerializer} that wraps a delegate serializer and uses
+ * {@link FilteringJsonGenerator} to exclude specified fields from the JSON output.
+ *
+ * @param <T> the type of object being serialized
+ */
 public class ExcludeSerializer<T> extends JsonSerializer<T> {
     private final Class<T> handledType;
     private final Set<String> excludes;
     private final JsonSerializer<Object> delegate;
 
+    /**
+     * Constructs an {@code ExcludeSerializer} with the given delegate serializer and field exclusions.
+     *
+     * @param handledType the class of objects this serializer handles, must not be null
+     * @param delegate    the delegate serializer to use, or {@code null} to use default serialization
+     * @param excludes    the field names to exclude from the JSON output
+     */
     public ExcludeSerializer(
             final Class<T> handledType,
             final JsonSerializer<Object> delegate,
@@ -42,15 +55,34 @@ public class ExcludeSerializer<T> extends JsonSerializer<T> {
         this.excludes = ImmutableSet.copyOf(excludes);
     }
 
+    /**
+     * Constructs an {@code ExcludeSerializer} with no delegate, using default serialization
+     * with the specified field exclusions.
+     *
+     * @param handledType the class of objects this serializer handles, must not be null
+     * @param excludes    the field names to exclude from the JSON output
+     */
     public ExcludeSerializer(final Class<T> handledType, final String... excludes) {
         this(handledType, null, excludes);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return the class of objects this serializer handles
+     */
     @Override
     public Class<T> handledType() {
         return handledType;
     }
 
+    /**
+     * Serializes the given value, wrapping the provided {@link JsonGenerator} in a
+     * {@link FilteringJsonGenerator} to exclude the configured fields. If a delegate serializer
+     * was provided, it is used; otherwise, default serialization is performed.
+     *
+     * {@inheritDoc}
+     */
     @Override
     public void serialize(final T value, final JsonGenerator gen, final SerializerProvider serializers)
             throws IOException, JsonProcessingException {

@@ -32,6 +32,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
+/**
+ * Immutable implementation of {@link AbstractMapPath} that wraps a {@link Map} and provides
+ * path-based navigation with typed accessors. Instances are created via the static {@code of}
+ * factory methods from an existing map or a JSON string.
+ */
 @Value.Immutable
 @JsonSerialize(using = MapPathSerializer.class, as = ImmutableMapPath.class)
 @JsonDeserialize(builder = ImmutableMapPath.Builder.class)
@@ -60,14 +65,28 @@ public abstract class MapPath extends AbstractMapPath {
 
     private static final MapPath EMPTY = ImmutableMapPath.builder().build();
 
+    /** Returns an empty {@link MapPath} with no properties. */
     public static MapPath of() {
         return EMPTY;
     }
 
+    /**
+     * Creates a {@link MapPath} from the given map using the default {@link ObjectMapper}.
+     *
+     * @param map the property map, or {@code null} for an empty instance
+     * @return a new {@link MapPath} wrapping the map
+     */
     public static MapPath of(final Map<?, ?> map) {
         return of(map, null);
     }
 
+    /**
+     * Creates a {@link MapPath} from the given map using the specified {@link ObjectMapper}.
+     *
+     * @param map    the property map, or {@code null} for an empty instance
+     * @param mapper the {@link ObjectMapper} to use for type conversions, or {@code null} for the default
+     * @return a new {@link MapPath} wrapping the map
+     */
     public static MapPath of(final Map<?, ?> map, final ObjectMapper mapper) {
         if (map == null || map.size() == 0) {
             return MapPath.of();
@@ -79,6 +98,13 @@ public abstract class MapPath extends AbstractMapPath {
         return mapPath;
     }
 
+    /**
+     * Creates a {@link MapPath} by parsing the given JSON string using the default {@link ObjectMapper}.
+     *
+     * @param json the JSON string to parse, or {@code null}/empty for an empty instance
+     * @return a new {@link MapPath} backed by the parsed map
+     * @throws IOException if the JSON cannot be parsed
+     */
     public static MapPath of(final String json) throws IOException {
         if (StringUtils.isEmpty(json)) {
             return MapPath.of();
@@ -86,6 +112,14 @@ public abstract class MapPath extends AbstractMapPath {
         return of(json, null);
     }
 
+    /**
+     * Creates a {@link MapPath} by parsing the given JSON string using the specified {@link ObjectMapper}.
+     *
+     * @param json   the JSON string to parse, or {@code null}/empty for an empty instance
+     * @param mapper the {@link ObjectMapper} to use for parsing and type conversions, or {@code null} for the default
+     * @return a new {@link MapPath} backed by the parsed map
+     * @throws IOException if the JSON cannot be parsed
+     */
     public static MapPath of(final String json, ObjectMapper mapper) throws IOException {
         if (StringUtils.isEmpty(json)) {
             return MapPath.of();
@@ -101,6 +135,12 @@ public abstract class MapPath extends AbstractMapPath {
         return mapPath;
     }
 
+    /**
+     * Returns the nested {@link Map} at the given path wrapped as a new {@link MapPath}.
+     *
+     * @param path the slash or dot separated path to navigate
+     * @return a {@link MapPath} wrapping the nested map, or an empty instance if the path does not resolve
+     */
     public MapPath getMapPath(final String path) {
         return MapPath.of(getMap(path), getObjectMapper());
     }

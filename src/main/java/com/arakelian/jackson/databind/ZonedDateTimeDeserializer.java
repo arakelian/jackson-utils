@@ -27,11 +27,24 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
+/**
+ * Jackson deserializer that converts date strings to {@link ZonedDateTime} using UTC normalization
+ * via {@link DateUtils}.
+ */
 public class ZonedDateTimeDeserializer extends StdDeserializer<ZonedDateTime> {
     public ZonedDateTimeDeserializer() {
         super(ZonedDateTime.class);
     }
 
+    /**
+     * Deserializes a JSON string token into a {@link ZonedDateTime} normalized to UTC.
+     *
+     * @param p the JSON parser
+     * @param ctxt the deserialization context
+     * @return a {@link ZonedDateTime} in UTC, or throws if the token is not a string
+     * @throws IOException if a low-level I/O problem occurs
+     * @throws JsonProcessingException if the token is not a string value
+     */
     @Override
     public ZonedDateTime deserialize(final JsonParser p, final DeserializationContext ctxt)
             throws IOException, JsonProcessingException {

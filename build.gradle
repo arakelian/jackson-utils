@@ -8,9 +8,6 @@ plugins {
     // keep dependencies up-to-date!
     id 'com.github.ben-manes.versions' version '0.53.0'
 
-    // useful for creating immutable java beans
-    id 'org.inferred.processors' version '3.7.0'
-
     // to ensure clean code
     id "net.ltgt.errorprone" version "4.4.0"
 
@@ -25,7 +22,7 @@ version = '5.0.0'
 apply from: "core.gradle"
 
 wrapper {
-    gradleVersion = '8.12.1'
+    gradleVersion = '9.3.1'
 }
 
 mavenPublishing {
@@ -61,16 +58,16 @@ mavenPublishing {
 }
 
 dependencies {
-    processor 'org.immutables:value:2.12.1'
+    annotationProcessor 'org.immutables:value:2.12.1'
 
     // annotations
     api 'org.immutables:value-annotations:2.12.1'
     
     // configure errorprone version
-    errorprone 'com.google.errorprone:error_prone_core:2.31.0'
+    errorprone 'com.google.errorprone:error_prone_core:2.47.0'
 
-    // use Java 11 compatible versions
-    api 'com.arakelian:more-commons:5.0.0'
+    // use Java 21 compatible versions
+    api 'com.arakelian:more-commons:5.1.0'
 
     // shadow Guava due to frequent downstream incompatibility issues
     api 'com.google.guava:guava:33.5.0-jre'
@@ -81,21 +78,22 @@ dependencies {
     api 'commons-io:commons-io:2.21.0'
     
     // using Jackson feature set which requires Java 8+
-    api 'com.fasterxml.jackson.core:jackson-core:2.18.2'
-    api 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
-    api 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.18.2'
-    api 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.18.2'
+    api 'com.fasterxml.jackson.core:jackson-core:2.21.1'
+    api 'com.fasterxml.jackson.core:jackson-databind:2.21.1'
+    api 'com.fasterxml.jackson.module:jackson-module-parameter-names:2.21.1'
+    api 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.21.1'
 
     // logging
-    testImplementation 'org.apache.logging.log4j:log4j-api:2.24.3'
-    testImplementation 'org.apache.logging.log4j:log4j-core:2.24.3'
-    testImplementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.24.3'
+    testImplementation 'org.apache.logging.log4j:log4j-api:2.25.3'
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.25.3'
+    testImplementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.25.3'
     testImplementation 'org.slf4j:jcl-over-slf4j:2.0.17'
     testImplementation 'org.slf4j:jul-to-slf4j:2.0.17'
     api                'org.slf4j:slf4j-api:2.0.17'
 
     // for unit testing
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.14.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'net.javacrumbs.json-unit:json-unit:4.1.1'
-    testImplementation 'com.arakelian:more-commons:5.0.0:tests'
+    testImplementation 'com.arakelian:more-commons:5.1.0:test-fixtures'
 }

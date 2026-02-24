@@ -26,6 +26,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
+/**
+ * Jackson serializer that writes {@link ZonedDateTime} values in ISO date format compatible with
+ * common date parsing libraries.
+ */
 public class ZonedDateTimeSerializer extends StdSerializer<ZonedDateTime> {
     public ZonedDateTimeSerializer() {
         super(ZonedDateTime.class);

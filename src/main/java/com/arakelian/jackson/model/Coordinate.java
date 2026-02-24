@@ -42,6 +42,10 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
+/**
+ * Immutable 2D or 3D coordinate with x, y, and optional z values. Supports JSON serialization
+ * as an array and deserialization from arrays or comma-separated text.
+ */
 @Value.Immutable(copy = false)
 @JsonSerialize(using = Coordinate.CoordinateSerializer.class)
 @JsonDeserialize(using = Coordinate.CoordinateDeserializer.class)
@@ -130,6 +134,13 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
         return Math.abs(x1 - x2) <= tolerance;
     }
 
+    /**
+     * Creates a 2D coordinate with the given x and y values.
+     *
+     * @param x the x ordinate
+     * @param y the y ordinate
+     * @return a new {@link Coordinate}
+     */
     public static Coordinate of(final double x, final double y) {
         return ImmutableCoordinate.builder() //
                 .x(x) //
@@ -137,6 +148,14 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
                 .build();
     }
 
+    /**
+     * Creates a 3D coordinate with the given x, y, and z values.
+     *
+     * @param x the x ordinate
+     * @param y the y ordinate
+     * @param z the z ordinate
+     * @return a new {@link Coordinate}
+     */
     public static Coordinate of(final double x, final double y, final double z) {
         return ImmutableCoordinate.builder() //
                 .x(x) //
@@ -145,6 +164,12 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
                 .build();
     }
 
+    /**
+     * Parses a coordinate from a comma-separated string in {@code x,y} or {@code x,y,z} format.
+     *
+     * @param value the comma-separated coordinate string
+     * @return a new {@link Coordinate}
+     */
     public static Coordinate of(final String value) {
         final Iterator<String> it = COMMA_SPLITTER.split(value).iterator();
 
@@ -166,10 +191,23 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
         return of(x, y, z);
     }
 
+    /**
+     * Rounds a value to the {@link #DEFAULT_PLACES default number} of decimal places.
+     *
+     * @param value the value to round
+     * @return the rounded value
+     */
     public static double round(final double value) {
         return round(value, DEFAULT_PLACES);
     }
 
+    /**
+     * Rounds a value to the specified number of decimal places using half-up rounding.
+     *
+     * @param value  the value to round
+     * @param places the number of decimal places
+     * @return the rounded value, or {@link Double#NaN} if the input is NaN
+     */
     public static double round(final double value, final int places) {
         Preconditions.checkArgument(places >= 0, "places must be >= 0");
 
@@ -291,10 +329,25 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
                 && (getZ() == other.getZ() || Double.isNaN(getZ()) && Double.isNaN(other.getZ()));
     }
 
+    /**
+     * Returns the x ordinate value.
+     *
+     * @return the x ordinate
+     */
     public abstract double getX();
 
+    /**
+     * Returns the y ordinate value.
+     *
+     * @return the y ordinate
+     */
     public abstract double getY();
 
+    /**
+     * Returns the z ordinate value, or {@link #NULL_ORDINATE} if not set.
+     *
+     * @return the z ordinate, or {@link Double#NaN} if not present
+     */
     @Value.Default
     public double getZ() {
         return NULL_ORDINATE;
@@ -316,6 +369,13 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
         return round(DEFAULT_PLACES);
     }
 
+    /**
+     * Returns a new coordinate with all ordinate values rounded to the specified number of
+     * decimal places. Returns {@code this} if rounding does not change any values.
+     *
+     * @param places the number of decimal places
+     * @return a rounded coordinate
+     */
     public Coordinate round(final int places) {
         final double x = getX();
         final double newX = round(x, places);
