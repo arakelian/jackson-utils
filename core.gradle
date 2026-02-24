@@ -1,36 +1,4 @@
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.2.1'  // The ProGuard Gradle plugin.
-    }
-}
-
-
 ext {
-    // useful macros, you can add your own
-    macros = [
-        'all' : [
-            'clean',
-            'classpath',
-            'build',
-            'minify',
-            'publishToMavenLocal'
-        ],
-        'deploy' : [
-            'publishAndReleaseToMavenCentral'
-        ],
-        'classpath' : [
-            'cleanEclipseClasspath',
-            'eclipseClasspath',
-            'eclipseFactoryPath',
-            'cleanIdeaModule',
-            'ideaModule'
-        ],
-    ]
-    
     // package patterns to exclude from Eclipse
     excludeFromEclipse = []
 }
@@ -48,7 +16,8 @@ repositories {
     mavenCentral()
 }
 
-task testsJar(type:Jar, dependsOn: testClasses) {
+tasks.register('testsJar', Jar) {
+    dependsOn testClasses
     archiveClassifier.set('tests')
     from sourceSets.test.output
 }
@@ -63,13 +32,17 @@ test {
 //  JAVA COMPILER
 // -------------------------------------------
 
-tasks.withType(JavaCompile) { task ->
-    options.release = 21
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
+tasks.withType(JavaCompile).configureEach {
     // always UTF-8
     options.encoding = 'UTF-8'
 
-    // java 8 option which export names of constructor and method parameter names; no longer
+    // export names of constructor and method parameter names; no longer
     // have to declare parameter names with @JsonCreator
     options.compilerArgs << "-parameters"
     
@@ -97,27 +70,6 @@ tasks.withType(JavaCompile) { task ->
 }
 
 
-// -------------------------------------------
-//  SHADOW JAR
-// -------------------------------------------
-
-if(plugins.hasPlugin("com.github.johnrengelman.shadow")) {
-    jar {
-        archiveClassifier.set('original')
-    }
-    
-    shadowJar {
-        archiveClassifier.set('shadow')
-    }
-
-    sourceSets {
-        // shadow configuration is added by Shadow plugin, but it's only configured for the main sourceset
-        test.compileClasspath += configurations.shadow
-        test.runtimeClasspath += configurations.shadow
-    }
-}
-
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -130,6 +82,21 @@ publishing {
 // -------------------------------------------
 //  ECLIPSE
 // -------------------------------------------
+
+tasks.register('eclipseFactoryPath') {
+    description = 'Generates the Eclipse .factorypath file for annotation processors'
+    def outputFile = file('.factorypath')
+    outputs.file outputFile
+    doLast {
+        def xml = new groovy.xml.MarkupBuilder(new PrintWriter(outputFile))
+        xml.doubleQuotes = true
+        xml.'factorypath' {
+            configurations.annotationProcessor.resolve().each { jar ->
+                'factorypathentry'(kind: 'EXTJAR', id: jar.absolutePath, enabled: true, runInBatchMode: false)
+            }
+        }
+    }
+}
 
 eclipse {
     classpath {
@@ -218,41 +185,35 @@ eclipse {
 //  README
 // -------------------------------------------
 
-task readme {
-    ant.replaceregexp(match:'\\<version\\>([0-9\\.]+)\\<\\/version\\>', replace:"<version>${version}</version>", flags:'g', byline:true) {
-        fileset(dir: '.', includes: 'README.md')
-    }
-    ant.replaceregexp(match:'com\\.arakelian\\:' + project.name + ':([0-9\\.]+)', replace:"com.arakelian:${project.name}:${version}", flags:'g', byline:true) {
-        fileset(dir: '.', includes: 'README.md')
-    }
-}
-
-
-// -------------------------------------------
-//  SHORTCUT TASKS
-// -------------------------------------------
-
-
-// This code allows us to define aliases, such as "all", so that when we do "gradle all",
-// we can substitute in a series of other gradle tasks
-// see: https://caffeineinduced.wordpress.com/2015/01/25/run-a-list-of-gradle-tasks-in-specific-order/
-def newTasks = []
-
-// gradle respects ordering of tasks specified on command line, so we replace shortcuts
-// with equivalent commands as though they were specified by user
-gradle.startParameter.taskNames.each { param ->
-    def macro = project.ext.macros[param]
-    if( macro ) {
-        macro.each { task ->
-            if(project.tasks.names.contains(task)) {
-                newTasks << task
-            }
+tasks.register('readme') {
+    doLast {
+        ant.replaceregexp(match:'\\<version\\>([0-9\\.]+)\\<\\/version\\>', replace:"<version>${version}</version>", flags:'g', byline:true) {
+            fileset(dir: '.', includes: 'README.md')
         }
-    } else {
-        newTasks << param
+        ant.replaceregexp(match:'com\\.arakelian\\:' + project.name + ':([0-9\\.]+)', replace:"com.arakelian:${project.name}:${version}", flags:'g', byline:true) {
+            fileset(dir: '.', includes: 'README.md')
+        }
     }
 }
 
-// replace command line arguments
-gradle.startParameter.taskNames = newTasks.flatten()
+
+// -------------------------------------------
+//  LIFECYCLE TASKS
+// -------------------------------------------
+
+tasks.register('classpath') {
+    description = 'Regenerates Eclipse and IntelliJ classpath files'
+    dependsOn 'cleanEclipseClasspath', 'eclipseClasspath', 'eclipseFactoryPath',
+              'cleanIdeaModule', 'ideaModule'
+}
+
+tasks.register('deploy') {
+    description = 'Publishes artifacts to Maven Central'
+    dependsOn 'publishAndReleaseToMavenCentral'
+}
+
+tasks.register('all') {
+    description = 'Clean, classpath, build, and publish to local Maven repository'
+    dependsOn 'clean', 'classpath', 'build', 'publishToMavenLocal'
+}
  
