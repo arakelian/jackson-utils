@@ -64,8 +64,7 @@ test {
 // -------------------------------------------
 
 tasks.withType(JavaCompile) { task ->
-    sourceCompatibility = 21
-    targetCompatibility = 21
+    options.release = 21
 
     // always UTF-8
     options.encoding = 'UTF-8'
