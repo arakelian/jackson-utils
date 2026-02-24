@@ -64,8 +64,8 @@ test {
 // -------------------------------------------
 
 tasks.withType(JavaCompile) { task ->
-    sourceCompatibility = 11
-    targetCompatibility = 11
+    sourceCompatibility = 21
+    targetCompatibility = 21
 
     // always UTF-8
     options.encoding = 'UTF-8'
@@ -88,6 +88,9 @@ tasks.withType(JavaCompile) { task ->
         
         // bogus warning
         options.errorprone.disable 'StringSplitter'
+
+        // we don't require expression switches
+        options.errorprone.disable 'StatementSwitchToExpressionSwitch'
         
         // ignore all generated source folders
         options.errorprone.excludedPaths = '.*generated.*'

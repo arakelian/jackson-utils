@@ -39,6 +39,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Preconditions;
 
+/**
+ * Immutable geographic point with latitude and longitude. Supports geohash encoding and JSON
+ * deserialization from objects, arrays, or geohash/comma-separated text.
+ */
 @Value.Immutable(copy = false)
 @JsonSerialize(as = ImmutableGeoPoint.class)
 @JsonDeserialize(using = GeoPoint.GeoPointDeserializer.class)
@@ -195,6 +199,13 @@ public abstract class GeoPoint implements Serializable {
         return (val & MAGIC[6]) >>> 1 | (val & MAGIC[0]) << 1;
     }
 
+    /**
+     * Creates a geographic point with the given latitude and longitude.
+     *
+     * @param lat the latitude in degrees
+     * @param lon the longitude in degrees
+     * @return a new {@link GeoPoint}
+     */
     public static GeoPoint of(final double lat, final double lon) {
         return ImmutableGeoPoint.builder() //
                 .lat(lat) //
@@ -202,6 +213,12 @@ public abstract class GeoPoint implements Serializable {
                 .build();
     }
 
+    /**
+     * Parses a geographic point from a comma-separated {@code lat,lon} string or a geohash string.
+     *
+     * @param value the string to parse
+     * @return a new {@link GeoPoint}, or {@code null} if the value is empty
+     */
     public static GeoPoint of(final String value) {
         if (StringUtils.isEmpty(value)) {
             return null;
@@ -232,10 +249,23 @@ public abstract class GeoPoint implements Serializable {
         return of(lat, lon);
     }
 
+    /**
+     * Rounds a value to the {@link #DEFAULT_PLACES default number} of decimal places.
+     *
+     * @param value the value to round
+     * @return the rounded value
+     */
     public static double round(final double value) {
         return round(value, DEFAULT_PLACES);
     }
 
+    /**
+     * Rounds a value to the specified number of decimal places using half-up rounding.
+     *
+     * @param value  the value to round
+     * @param places the number of decimal places
+     * @return the rounded value
+     */
     public static double round(final double value, final int places) {
         Preconditions.checkArgument(places >= 0, "places must be >= 0");
 
@@ -300,8 +330,18 @@ public abstract class GeoPoint implements Serializable {
         return new String(chars);
     }
 
+    /**
+     * Returns the latitude in degrees.
+     *
+     * @return the latitude
+     */
     public abstract double getLat();
 
+    /**
+     * Returns the longitude in degrees.
+     *
+     * @return the longitude
+     */
     public abstract double getLon();
 
     @Value.Check
@@ -324,6 +364,13 @@ public abstract class GeoPoint implements Serializable {
         return round(DEFAULT_PLACES);
     }
 
+    /**
+     * Returns a new geographic point with latitude and longitude rounded to the specified number
+     * of decimal places. Returns {@code this} if rounding does not change any values.
+     *
+     * @param places the number of decimal places
+     * @return a rounded geographic point
+     */
     public GeoPoint round(final int places) {
         final double lat = getLat();
         final double newLat = round(lat, places);
