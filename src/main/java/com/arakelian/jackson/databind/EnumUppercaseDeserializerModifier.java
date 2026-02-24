@@ -18,6 +18,7 @@
 package com.arakelian.jackson.databind;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import com.arakelian.core.utils.MoreStringUtils;
 import com.fasterxml.jackson.core.JsonParser;
@@ -55,10 +56,10 @@ public final class EnumUppercaseDeserializerModifier extends BeanDeserializerMod
                 } catch (final IllegalArgumentException e) {
                     try {
                         // try uppercase
-                        return Enum.valueOf(rawClass, trimmed.toUpperCase());
+                        return Enum.valueOf(rawClass, trimmed.toUpperCase(Locale.ROOT));
                     } catch (final IllegalArgumentException e2) {
                         // try lowercase
-                        return Enum.valueOf(rawClass, trimmed.toLowerCase());
+                        return Enum.valueOf(rawClass, trimmed.toLowerCase(Locale.ROOT));
                     }
                 }
             }

@@ -53,8 +53,7 @@ public abstract class GeoPoint implements Serializable {
         public GeoPoint deserialize(final JsonParser p, final DeserializationContext ctxt)
                 throws IOException, JsonProcessingException {
             final JsonNode node = ctxt.readValue(p, JsonNode.class);
-            if (node instanceof ObjectNode) {
-                final ObjectNode obj = (ObjectNode) node;
+            if (node instanceof ObjectNode obj) {
                 final JsonNode lat = obj.get("lat");
                 final JsonNode lon = obj.get("lon");
                 if (lat == null || lon == null || !lat.isNumber() || !lon.isNumber()) {
@@ -68,8 +67,7 @@ public abstract class GeoPoint implements Serializable {
                         .build();
             }
 
-            if (node instanceof ArrayNode) {
-                final ArrayNode arr = (ArrayNode) node;
+            if (node instanceof ArrayNode arr) {
                 if (arr.size() != 2) {
                     // always throws exception
                     ctxt.reportInputMismatch(
@@ -90,8 +88,7 @@ public abstract class GeoPoint implements Serializable {
                 return null;
             }
 
-            if (node instanceof TextNode) {
-                final TextNode text = (TextNode) node;
+            if (node instanceof TextNode text) {
                 final String v = text.asText("");
                 GeoPoint point = of(v);
                 return point;
