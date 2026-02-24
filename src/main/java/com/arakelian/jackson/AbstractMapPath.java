@@ -118,8 +118,7 @@ public abstract class AbstractMapPath implements Serializable {
             if (value == null) {
                 return defaultValue;
             }
-            if (value instanceof Collection) {
-                final Collection c = (Collection) value;
+            if (value instanceof Collection<?> c) {
                 if (c.size() == 0) {
                     return defaultValue;
                 }

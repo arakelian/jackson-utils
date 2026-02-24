@@ -56,8 +56,7 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
         public Coordinate deserialize(final JsonParser p, final DeserializationContext ctxt)
                 throws IOException, JsonProcessingException {
             final JsonNode node = ctxt.readValue(p, JsonNode.class);
-            if (node instanceof ArrayNode) {
-                final ArrayNode arr = (ArrayNode) node;
+            if (node instanceof ArrayNode arr) {
                 final int size = arr.size();
                 if (size == 2) {
                     return ImmutableCoordinate.builder() //
@@ -81,8 +80,7 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
 
             }
 
-            if (node instanceof TextNode) {
-                final TextNode text = (TextNode) node;
+            if (node instanceof TextNode text) {
                 final String v = text.asText("");
                 return of(v);
             }

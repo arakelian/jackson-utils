@@ -88,8 +88,8 @@ public class TrimWhitespaceDeserializer extends StdScalarDeserializer<String> {
             if (ob == null) {
                 return null;
             }
-            if (ob instanceof byte[]) {
-                return context.getBase64Variant().encode((byte[]) ob, false);
+            if (ob instanceof byte[] array) {
+                return context.getBase64Variant().encode(array, false);
             }
             // otherwise, try conversion using toString()...
             return ob.toString();

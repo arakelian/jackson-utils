@@ -63,11 +63,13 @@ public abstract class MapPath extends AbstractMapPath {
         }
     }
 
-    private static final MapPath EMPTY = ImmutableMapPath.builder().build();
+    private static final class EmptyHolder {
+        static final MapPath INSTANCE = ImmutableMapPath.builder().build();
+    }
 
     /** Returns an empty {@link MapPath} with no properties. */
     public static MapPath of() {
-        return EMPTY;
+        return EmptyHolder.INSTANCE;
     }
 
     /**
