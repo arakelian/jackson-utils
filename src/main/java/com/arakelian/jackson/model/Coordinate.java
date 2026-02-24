@@ -116,7 +116,7 @@ public abstract class Coordinate implements Serializable, Comparable<Coordinate>
     public static final int DEFAULT_PLACES = 6;
 
     /**
-     * Error margin when comparison x/y/z values
+     * Error margin when comparing x/y/z values
      */
     public static final double DEFAULT_ERROR = 0.000001d;
 
