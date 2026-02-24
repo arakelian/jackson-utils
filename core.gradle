@@ -99,6 +99,11 @@ tasks.register('eclipseFactoryPath') {
 }
 
 eclipse {
+    jdt {
+        sourceCompatibility = 21
+        targetCompatibility = 21
+    }
+
     classpath {
         // override default 'bin'
         defaultOutputDir = project.file('bin/classes')
